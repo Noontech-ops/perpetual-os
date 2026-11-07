@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
   { href: "/os", label: "Dashboard", icon: "grid" },
@@ -31,6 +32,10 @@ const icons: Record<string, ReactNode> = {
 export default function OSLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { user, signOut } = useAuth();
+  const initials = user?.user_metadata?.full_name
+    ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+    : 'ED';
 
   return (
     <div className="min-h-screen flex bg-slate-50">
@@ -98,8 +103,17 @@ export default function OSLayout({ children }: { children: ReactNode }) {
             <Link href="/outcomes" className="text-sm text-slate-500 hover:text-brand-600">
               View public page &#8599;
             </Link>
+            {user ? (
+              <button onClick={signOut} className="text-sm text-slate-500 hover:text-red-600">
+                Sign out
+              </button>
+            ) : (
+              <Link href="/login" className="text-sm text-brand-600 hover:text-brand-700 font-medium">
+                Sign in
+              </Link>
+            )}
             <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 text-sm font-medium">
-              ED
+              {initials}
             </div>
           </div>
         </header>
