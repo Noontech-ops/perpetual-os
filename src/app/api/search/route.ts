@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('organizations')
-      .select('id, name, mission, sector, address, financials, leadership')
+      .select('id, name, mission, sector, address, financials, leadership, slug')
       .eq('public_profile', true);
 
     if (q) {
@@ -40,7 +40,28 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await query.limit(20);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+
+    const orgIds = (data ?? []).map((o: { id: string }) => o.id);
+    const outcomesMap: Record<string, unknown[]> = {};
+    if (orgIds.length > 0) {
+      const { data: outData } = await supabase
+        .from('outcomes')
+        .select('*')
+        .in('organization_id', orgIds);
+      if (outData) {
+        for (const o of outData) {
+          const oid = (o as { organization_id: string }).organization_id;
+          if (!outcomesMap[oid]) outcomesMap[oid] = [];
+          outcomesMap[oid].push(o);
+        }
+      }
+    }
+
+    const enriched = (data ?? []).map((org: { id: string }) => ({
+      ...org,
+      outcomes: outcomesMap[org.id] ?? [],
+    }));
+    return NextResponse.json(enriched);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Search failed';
     return NextResponse.json({ error: message }, { status: 500 });
