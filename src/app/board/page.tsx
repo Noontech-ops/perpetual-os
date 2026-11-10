@@ -196,15 +196,15 @@ export default function BoardDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-white border border-slate-200 rounded-xl p-4">
               <p className="text-xs text-slate-500">Active Grants</p>
-              <p className="text-xl font-bold text-slate-900 mt-1">{activeGrants.length}</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{activeGrants.length}</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-xl p-4">
               <p className="text-xs text-slate-500">Pending Applications</p>
-              <p className="text-xl font-bold text-slate-900 mt-1">{pendingGrants.length}</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{pendingGrants.length}</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-xl p-4">
               <p className="text-xs text-slate-500">Pipeline Value</p>
-              <p className="text-xl font-bold text-slate-900 mt-1">
+              <p className="text-3xl font-bold text-slate-900 mt-1">
                 {formatCurrency(grants.reduce((s, g) => s + g.amountRequested, 0))}
               </p>
             </div>
