@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: NextRequest) {
   const q = request.nextUrl.searchParams.get('q') || '';
   const sector = request.nextUrl.searchParams.get('sector');
+  const id = request.nextUrl.searchParams.get('id');
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -13,6 +14,17 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = await createClient();
+
+  if (id) {
+    const { data, error } = await supabase
+      .from('organizations')
+      .select('id, name, legal_name, ein, mission, vision, sector, founded, website, address, phone, email, leadership, financials, public_profile')
+      .eq('id', id)
+      .single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 404 });
+    return NextResponse.json(data);
+  }
+
   let query = supabase
     .from('organizations')
     .select('id, name, mission, sector, address, financials, leadership')

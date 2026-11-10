@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  organization,
-  grants,
-  constituents,
-  transactions,
-  programs,
-  outcomes,
-  agentActions,
-  dashboardStats,
-} from "@/lib/mock-data";
+  getGrants,
+  getConstituents,
+  getTransactions,
+  getPrograms,
+  getOutcomes,
+  getAgentActions,
+  updateAgentAction,
+  runAgent,
+} from "@/lib/data";
+import type {
+  Grant,
+  Constituent,
+  Transaction,
+  Program,
+  Outcome,
+  AgentAction as AgentActionType,
+} from "@/lib/types";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +64,66 @@ function statusToAgentActionStatus(s: string): "auto-approved" | "pending" | "ap
 
 export default function OSDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("Overview");
+  const [grants, setGrants] = useState<Grant[]>([]);
+  const [constituents, setConstituents] = useState<Constituent[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [outcomes, setOutcomes] = useState<Outcome[]>([]);
+  const [agentActions, setAgentActions] = useState<AgentActionType[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      getGrants(),
+      getConstituents(),
+      getTransactions(),
+      getPrograms(),
+      getOutcomes(),
+      getAgentActions(),
+    ]).then(([g, c, t, p, o, a]) => {
+      setGrants(g);
+      setConstituents(c);
+      setTransactions(t);
+      setPrograms(p);
+      setOutcomes(o);
+      setAgentActions(a);
+      setLoading(false);
+    });
+  }, []);
+
+  async function handleUpdateAction(id: string, status: "approved" | "rejected") {
+    const ok = await updateAgentAction(id, status);
+    if (ok) {
+      setAgentActions((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, status } : a))
+      );
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="border-b border-slate-200 -mt-2">
+          <nav className="flex gap-1">
+            {tabs.map((tab) => (
+              <div key={tab} className="px-4 py-2.5 text-sm font-medium text-slate-300">
+                {tab}
+              </div>
+            ))}
+          </nav>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+          ))}
+        </div>
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-64 bg-slate-100 rounded-xl animate-pulse" />
+          <div className="h-64 bg-slate-100 rounded-xl animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -78,19 +146,50 @@ export default function OSDashboard() {
         </nav>
       </div>
 
-      {activeTab === "Overview" && <OverviewTab />}
-      {activeTab === "Grants Agent" && <GrantsAgentTab />}
-      {activeTab === "Donors" && <DonorsTab />}
-      {activeTab === "Finance" && <FinanceTab />}
-      {activeTab === "Programs" && <ProgramsTab />}
-      {activeTab === "Outcomes" && <OutcomesTab />}
+      {activeTab === "Overview" && (
+        <OverviewTab
+          grants={grants}
+          constituents={constituents}
+          transactions={transactions}
+          outcomes={outcomes}
+          agentActions={agentActions}
+          onUpdateAction={handleUpdateAction}
+        />
+      )}
+      {activeTab === "Grants Agent" && (
+        <GrantsAgentTab grants={grants} programs={programs} />
+      )}
+      {activeTab === "Donors" && <DonorsTab constituents={constituents} />}
+      {activeTab === "Finance" && (
+        <FinanceTab transactions={transactions} grants={grants} />
+      )}
+      {activeTab === "Programs" && (
+        <ProgramsTab programs={programs} outcomes={outcomes} />
+      )}
+      {activeTab === "Outcomes" && (
+        <OutcomesTab programs={programs} outcomes={outcomes} />
+      )}
     </div>
   );
 }
 
 /* ───────────────────────────── Overview Tab ───────────────────────────── */
 
-function OverviewTab() {
+function OverviewTab({
+  grants,
+  constituents,
+  transactions,
+  outcomes,
+  agentActions,
+  onUpdateAction,
+}: {
+  grants: Grant[];
+  constituents: Constituent[];
+  transactions: Transaction[];
+  outcomes: Outcome[];
+  agentActions: AgentActionType[];
+  onUpdateAction: (id: string, status: "approved" | "rejected") => Promise<void>;
+}) {
   const totalRevenueYTD = transactions
     .filter((t) => t.direction === "inflow")
     .reduce((sum, t) => sum + t.amount, 0);
@@ -182,8 +281,16 @@ function OverviewTab() {
                   evidence={action.evidence}
                   status={statusToAgentActionStatus(action.status)}
                   timestamp={formatDate(action.createdAt)}
-                  onApprove={action.status === "pending" ? () => {} : undefined}
-                  onReject={action.status === "pending" ? () => {} : undefined}
+                  onApprove={
+                    action.status === "pending"
+                      ? () => onUpdateAction(action.id, "approved")
+                      : undefined
+                  }
+                  onReject={
+                    action.status === "pending"
+                      ? () => onUpdateAction(action.id, "rejected")
+                      : undefined
+                  }
                 />
               ))}
             </div>
@@ -299,7 +406,27 @@ function OverviewTab() {
 
 /* ──────────────────────────── Grants Agent Tab ──────────────────────────── */
 
-function GrantsAgentTab() {
+function GrantsAgentTab({
+  grants,
+  programs,
+}: {
+  grants: Grant[];
+  programs: Program[];
+}) {
+  const [agentResult, setAgentResult] = useState<string | null>(null);
+  const [agentRunning, setAgentRunning] = useState(false);
+
+  async function handleRunAgent() {
+    setAgentRunning(true);
+    setAgentResult(null);
+    const result = await runAgent(
+      "grants",
+      "Find new grant opportunities and draft recommendations for our organization."
+    );
+    setAgentResult(result);
+    setAgentRunning(false);
+  }
+
   const pipelineValue = grants.reduce((s, g) => s + g.amountRequested, 0);
   const now = new Date();
   const dueThisMonth = grants.filter((g) =>
@@ -367,9 +494,30 @@ function GrantsAgentTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Grant Pipeline</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Grant Pipeline</CardTitle>
+            <button
+              onClick={handleRunAgent}
+              disabled={agentRunning}
+              className="px-4 py-2 text-sm font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors"
+            >
+              {agentRunning ? "Running Agent..." : "Run Grants Agent"}
+            </button>
+          </div>
         </CardHeader>
         <CardContent>
+          {agentResult && (
+            <div className="mb-4 p-4 bg-brand-50 border border-brand-200 rounded-lg">
+              <p className="text-xs font-medium text-brand-700 mb-1">Agent Result</p>
+              <p className="text-sm text-slate-800 whitespace-pre-wrap">{agentResult}</p>
+              <button
+                onClick={() => setAgentResult(null)}
+                className="mt-2 text-xs text-slate-500 hover:text-slate-700"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -489,7 +637,7 @@ function GrantsAgentTab() {
 
 /* ─────────────────────────────── Donors Tab ─────────────────────────────── */
 
-function DonorsTab() {
+function DonorsTab({ constituents }: { constituents: Constituent[] }) {
   const [segment, setSegment] = useState<
     "all" | "major" | "mid" | "grassroots"
   >("all");
@@ -709,7 +857,13 @@ function DonorsTab() {
 
 /* ──────────────────────────── Finance Tab ──────────────────────────── */
 
-function FinanceTab() {
+function FinanceTab({
+  transactions,
+  grants,
+}: {
+  transactions: Transaction[];
+  grants: Grant[];
+}) {
   const income = transactions
     .filter((t) => t.direction === "inflow")
     .reduce((s, t) => s + t.amount, 0);
@@ -939,7 +1093,13 @@ function FinanceTab() {
 
 /* ──────────────────────────── Programs Tab ──────────────────────────── */
 
-function ProgramsTab() {
+function ProgramsTab({
+  programs,
+  outcomes,
+}: {
+  programs: Program[];
+  outcomes: Outcome[];
+}) {
   return (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1065,7 +1225,13 @@ function ProgramsTab() {
 
 /* ──────────────────────────── Outcomes Tab ──────────────────────────── */
 
-function OutcomesTab() {
+function OutcomesTab({
+  programs,
+  outcomes,
+}: {
+  programs: Program[];
+  outcomes: Outcome[];
+}) {
   const allMetrics = outcomes.flatMap((o) =>
     o.metrics.map((m) => ({ ...m, outcomeId: o.id, programId: o.programId }))
   );
