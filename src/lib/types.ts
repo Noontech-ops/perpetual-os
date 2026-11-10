@@ -155,6 +155,7 @@ export interface Organization {
   };
   programIds: string[];
   publicProfile: boolean;
+  slug?: string;
   createdAt: string;
   updatedAt: string;
 }

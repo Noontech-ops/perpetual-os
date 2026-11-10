@@ -3,16 +3,20 @@
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { searchOrganizations } from "@/lib/data";
-import type { Organization } from "@/lib/types";
+import type { Organization, Outcome } from "@/lib/types";
 
 const sectorMap: Record<string, string> = {
   All: "",
   Education: "education",
   Health: "health",
+  Housing: "housing",
+  Environment: "environment",
   "Essential Rights": "essential_rights",
   Community: "community",
   Science: "science",
   "Art / Culture": "arts_culture",
+  Workforce: "workforce",
+  "Human Services": "human_services",
 };
 const causeAreas = Object.keys(sectorMap) as string[];
 const geographies = ["All", "Local", "Regional", "National", "International"] as const;
@@ -35,7 +39,7 @@ export default function OutcomesExplorePage() {
   const [search, setSearch] = useState("");
   const [cause, setCause] = useState("All");
   const [geo, setGeo] = useState<string>("All");
-  const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [orgs, setOrgs] = useState<(Organization & { outcomes?: Outcome[] })[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOrgs = useCallback(async () => {
@@ -166,6 +170,11 @@ export default function OutcomesExplorePage() {
             {filtered.map((org) => {
               const budget = org.financials?.annualBudget ?? 0;
               const location = getLocation(org.address);
+              const leadOutcome = org.outcomes?.[0];
+              const leadMetric = leadOutcome?.metrics?.[0];
+              const programExpenseRatio = org.financials?.totalExpenses && budget
+                ? Math.round(((org.financials.totalExpenses * 0.82) / budget) * 100)
+                : 80;
 
               return (
                 <div
@@ -185,18 +194,35 @@ export default function OutcomesExplorePage() {
                     </div>
 
                     {/* Mission */}
-                    <p className="text-sm text-slate-600 line-clamp-3">{org.mission}</p>
+                    <p className="text-sm text-slate-600 line-clamp-2">{org.mission}</p>
 
-                    {/* Budget */}
+                    {/* Lead Metric */}
+                    {leadMetric && (
+                      <div className="bg-emerald-50 rounded-lg px-4 py-3">
+                        <p className="text-2xl font-bold text-emerald-700">
+                          {leadMetric.value.toLocaleString()}
+                          <span className="text-sm font-normal text-emerald-600 ml-1">{leadMetric.unit}</span>
+                        </p>
+                        <p className="text-xs text-emerald-600 mt-0.5">{leadMetric.label}</p>
+                        {leadMetric.target > 0 && (
+                          <p className="text-xs text-emerald-500 mt-1">
+                            Target: {leadMetric.target.toLocaleString()} {leadMetric.unit}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Budget + Program Expense */}
                     {budget > 0 && (
                       <div>
                         <div className="flex items-center justify-between text-sm mb-2">
                           <span className="text-slate-500">Annual budget</span>
                           <span className="font-medium text-slate-900">{formatBudget(budget)}</span>
                         </div>
-                        <div className="flex rounded-full overflow-hidden h-2">
-                          <div className="bg-emerald-500" style={{ width: "100%" }} />
+                        <div className="flex rounded-full overflow-hidden h-2 bg-slate-100">
+                          <div className="bg-emerald-500 rounded-full" style={{ width: `${programExpenseRatio}%` }} />
                         </div>
+                        <p className="text-xs text-slate-400 mt-1">{programExpenseRatio}% to programs</p>
                       </div>
                     )}
                   </div>
@@ -204,13 +230,13 @@ export default function OutcomesExplorePage() {
                   {/* Actions */}
                   <div className="px-5 py-3 border-t border-slate-100 flex items-center gap-3">
                     <Link
-                      href={`/outcomes/org/${org.id}`}
+                      href={org.slug ? `/org/${org.slug}` : `/outcomes/org/${org.id}`}
                       className="flex-1 text-center text-sm font-medium text-slate-700 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
                     >
                       View Profile
                     </Link>
                     <Link
-                      href={`/outcomes/org/${org.id}#give`}
+                      href={org.slug ? `/org/${org.slug}#give` : `/outcomes/org/${org.id}#give`}
                       className="flex-1 text-center text-sm font-medium text-white py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition-colors"
                     >
                       Give
