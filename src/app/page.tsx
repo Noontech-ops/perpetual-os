@@ -106,9 +106,13 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-slate-200 bg-white py-8">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-sm text-slate-500">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <span>&copy; 2026 Perpetual. All rights reserved.</span>
-          <span>perpetualoutcomes.com</span>
+          <div className="flex items-center gap-4">
+            <Link href="/board" className="hover:text-slate-700">Board View</Link>
+            <Link href="/org/bay-area-literacy-coalition" className="hover:text-slate-700">Sample Org</Link>
+            <span>perpetualoutcomes.com</span>
+          </div>
         </div>
       </footer>
     </div>
