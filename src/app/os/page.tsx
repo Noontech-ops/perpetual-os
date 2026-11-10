@@ -25,6 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/ui/stat-card";
 import { Progress } from "@/components/ui/progress";
 import { AgentAction } from "@/components/ui/agent-action";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
 
 const tabs = [
   "Overview",
@@ -71,8 +73,11 @@ export default function OSDashboard() {
   const [outcomes, setOutcomes] = useState<Outcome[]>([]);
   const [agentActions, setAgentActions] = useState<AgentActionType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     Promise.all([
       getGrants(),
       getConstituents(),
@@ -81,6 +86,7 @@ export default function OSDashboard() {
       getOutcomes(),
       getAgentActions(),
     ]).then(([g, c, t, p, o, a]) => {
+      if (cancelled) return;
       setGrants(g);
       setConstituents(c);
       setTransactions(t);
@@ -88,8 +94,13 @@ export default function OSDashboard() {
       setOutcomes(o);
       setAgentActions(a);
       setLoading(false);
+    }).catch((err) => {
+      if (cancelled) return;
+      setError(err instanceof Error ? err.message : "Failed to load dashboard data");
+      setLoading(false);
     });
-  }, []);
+    return () => { cancelled = true; };
+  }, [retryCount]);
 
   async function handleUpdateAction(id: string, status: "approved" | "rejected") {
     const ok = await updateAgentAction(id, status);
@@ -103,24 +114,77 @@ export default function OSDashboard() {
   if (loading) {
     return (
       <div className="space-y-6">
+        {/* Tab bar renders immediately */}
         <div className="border-b border-slate-200 -mt-2">
-          <nav className="flex gap-1">
+          <nav className="flex gap-1 overflow-x-auto flex-nowrap">
             {tabs.map((tab) => (
-              <div key={tab} className="px-4 py-2.5 text-sm font-medium text-slate-300">
+              <div key={tab} className="px-4 py-2.5 text-sm font-medium text-slate-300 whitespace-nowrap">
                 {tab}
               </div>
             ))}
           </nav>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 4 skeleton stat cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+            <div key={i} className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-7 w-28" />
+              <Skeleton className="h-3 w-16" />
+            </div>
           ))}
         </div>
+        {/* 3 skeleton agent action cards + sidebar */}
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-64 bg-slate-100 rounded-xl animate-pulse" />
-          <div className="h-64 bg-slate-100 rounded-xl animate-pulse" />
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader><Skeleton className="h-5 w-32" /></CardHeader>
+              <CardContent className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="border border-slate-100 rounded-lg p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-5 w-5 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+          <Card>
+            <CardHeader><Skeleton className="h-5 w-36" /></CardHeader>
+            <CardContent className="space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-start justify-between gap-2">
+                  <div className="space-y-1 flex-1">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                  <Skeleton className="h-5 w-14 rounded-full" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="border-b border-slate-200 -mt-2">
+          <nav className="flex gap-1 overflow-x-auto flex-nowrap">
+            {tabs.map((tab) => (
+              <div key={tab} className="px-4 py-2.5 text-sm font-medium text-slate-300 whitespace-nowrap">
+                {tab}
+              </div>
+            ))}
+          </nav>
+        </div>
+        <ErrorState title="Dashboard failed to load" message={error} onRetry={() => setRetryCount(c => c + 1)} />
       </div>
     );
   }
@@ -128,13 +192,13 @@ export default function OSDashboard() {
   return (
     <div className="space-y-6">
       <div className="border-b border-slate-200 -mt-2">
-        <nav className="flex gap-1">
+        <nav className="flex gap-1 overflow-x-auto flex-nowrap">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+                "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0",
                 activeTab === tab
                   ? "border-brand-600 text-brand-700"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -415,15 +479,34 @@ function GrantsAgentTab({
 }) {
   const [agentResult, setAgentResult] = useState<string | null>(null);
   const [agentRunning, setAgentRunning] = useState(false);
+  const [agentError, setAgentError] = useState<string | null>(null);
 
   async function handleRunAgent() {
     setAgentRunning(true);
     setAgentResult(null);
-    const result = await runAgent(
-      "grants",
-      "Find new grant opportunities and draft recommendations for our organization."
-    );
-    setAgentResult(result);
+    setAgentError(null);
+    try {
+      const result = await runAgent(
+        "grants",
+        "Find new grant opportunities and draft recommendations for our organization."
+      );
+      if (!result) {
+        setAgentError("Agent unavailable — check your Anthropic API key at console.anthropic.com");
+      } else {
+        setAgentResult(result);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Agent request failed";
+      if (msg.includes("credit") || msg.includes("billing")) {
+        setAgentError("Agent unavailable — add API credits at console.anthropic.com");
+      } else if (msg.includes("rate") || msg.includes("429")) {
+        setAgentError("Agent is rate limited — please try again in a moment");
+      } else if (msg.includes("key") || msg.includes("401") || msg.includes("403")) {
+        setAgentError("Agent unavailable — check your Anthropic API key");
+      } else {
+        setAgentError(msg);
+      }
+    }
     setAgentRunning(false);
   }
 
@@ -506,6 +589,18 @@ function GrantsAgentTab({
           </div>
         </CardHeader>
         <CardContent>
+          {agentError && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                <path strokeLinecap="round" strokeWidth="2" d="M12 8v4M12 16h.01" />
+              </svg>
+              <div>
+                <p className="text-sm font-medium text-red-800">{agentError}</p>
+                <button onClick={() => setAgentError(null)} className="mt-1 text-xs text-red-600 hover:text-red-700">Dismiss</button>
+              </div>
+            </div>
+          )}
           {agentResult && (
             <div className="mb-4 p-4 bg-brand-50 border border-brand-200 rounded-lg">
               <p className="text-xs font-medium text-brand-700 mb-1">Agent Result</p>

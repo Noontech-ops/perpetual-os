@@ -77,14 +77,63 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="animate-pulse space-y-6">
-          <div className="h-4 bg-slate-200 rounded w-1/4" />
+        <div className="space-y-6">
+          {/* Breadcrumb skeleton */}
+          <div className="h-4 bg-slate-200 rounded w-48 animate-pulse" />
+          {/* Org header skeleton */}
           <div className="flex gap-4">
-            <div className="w-14 h-14 rounded-xl bg-slate-200" />
+            <div className="w-14 h-14 rounded-xl bg-slate-200 animate-pulse shrink-0" />
             <div className="space-y-2 flex-1">
-              <div className="h-6 bg-slate-200 rounded w-1/3" />
-              <div className="h-4 bg-slate-100 rounded w-1/2" />
-              <div className="h-4 bg-slate-100 rounded w-2/3" />
+              <div className="h-7 bg-slate-200 rounded w-1/3 animate-pulse" />
+              <div className="h-4 bg-slate-100 rounded w-1/2 animate-pulse" />
+              <div className="flex gap-2 mt-1">
+                <div className="h-5 w-16 bg-slate-100 rounded-full animate-pulse" />
+                <div className="h-5 w-20 bg-slate-100 rounded-full animate-pulse" />
+              </div>
+            </div>
+          </div>
+          {/* Tabs skeleton */}
+          <div className="flex gap-1 border-b border-slate-200 pb-2">
+            {["w-20", "w-24", "w-20", "w-24", "w-24"].map((w, i) => (
+              <div key={i} className={`h-4 bg-slate-100 rounded ${w} animate-pulse`} />
+            ))}
+          </div>
+          {/* Content grid skeleton */}
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Financials skeleton */}
+              <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+                <div className="h-5 bg-slate-200 rounded w-28 animate-pulse" />
+                <div className="grid grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="h-3 bg-slate-100 rounded w-20 animate-pulse" />
+                      <div className="h-6 bg-slate-200 rounded w-24 animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Programs skeleton */}
+              <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+                <div className="h-5 bg-slate-200 rounded w-24 animate-pulse" />
+                {[1, 2].map((i) => (
+                  <div key={i} className="border border-slate-100 rounded-lg p-4 space-y-2">
+                    <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse" />
+                    <div className="h-3 bg-slate-100 rounded w-full animate-pulse" />
+                    <div className="h-3 bg-slate-100 rounded w-2/3 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Giving sidebar skeleton */}
+            <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4 h-fit">
+              <div className="h-5 bg-slate-200 rounded w-32 animate-pulse" />
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="h-10 bg-slate-100 rounded-lg animate-pulse" />
+                ))}
+              </div>
+              <div className="h-10 bg-slate-200 rounded-lg animate-pulse" />
             </div>
           </div>
         </div>
@@ -304,12 +353,12 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
 
             <div>
               <label className="block text-sm text-slate-600 mb-1.5">Amount</label>
-              <div className="flex gap-2 mb-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
                 {["25", "50", "100", "250", "500"].map((a) => (
                   <button
                     key={a}
                     onClick={() => setGiveAmount(a)}
-                    className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`py-1.5 rounded-lg text-sm font-medium transition-colors ${
                       giveAmount === a
                         ? "bg-emerald-600 text-white"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"

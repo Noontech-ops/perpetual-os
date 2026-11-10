@@ -11,11 +11,11 @@ export default function Home() {
             </div>
             <span className="text-xl font-semibold text-slate-900">Perpetual</span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/outcomes" className="text-sm text-slate-600 hover:text-slate-900">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <Link href="/outcomes" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
               For Donors
             </Link>
-            <Link href="/os" className="text-sm text-slate-600 hover:text-slate-900">
+            <Link href="/os" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
               For Nonprofits
             </Link>
             <Link
@@ -106,9 +106,13 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-slate-200 bg-white py-8">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-sm text-slate-500">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <span>&copy; 2026 Perpetual. All rights reserved.</span>
-          <span>perpetualoutcomes.com</span>
+          <div className="flex items-center gap-4">
+            <Link href="/board" className="hover:text-slate-700">Board View</Link>
+            <Link href="/org/bay-area-literacy-coalition" className="hover:text-slate-700">Sample Org</Link>
+            <span>perpetualoutcomes.com</span>
+          </div>
         </div>
       </footer>
     </div>
