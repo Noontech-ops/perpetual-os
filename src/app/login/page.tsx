@@ -29,9 +29,12 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-50 to-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="text-center mb-8">
+          <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-xl">P</span>
+          </div>
           <h1 className="text-2xl font-bold text-gray-900">Sign in to Perpetual</h1>
           <p className="text-gray-500 mt-2">Welcome back</p>
         </div>
@@ -87,7 +90,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><p className="text-gray-400">Loading...</p></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-50 to-gray-50"><p className="text-gray-400">Loading...</p></div>}>
       <LoginForm />
     </Suspense>
   );
