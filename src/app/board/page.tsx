@@ -51,15 +51,15 @@ export default function BoardDashboard() {
           <h2 className="text-lg font-semibold text-slate-900 mb-4">Financial Summary</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
-              { label: "Revenue YTD", value: formatCurrency(fin?.totalRevenue ?? 0) },
-              { label: "Total Expenses", value: formatCurrency(fin?.totalExpenses ?? 0) },
-              { label: "Net Assets", value: formatCurrency(fin?.netAssets ?? 0) },
-              { label: "Cash on Hand", value: formatCurrency(fin?.cashOnHand ?? 0) },
-              { label: "Months of Runway", value: String(fin?.monthsOfRunway ?? 0) },
+              { label: "Revenue YTD", value: formatCurrency(fin?.totalRevenue ?? 0), bg: "bg-emerald-50 border-emerald-200" },
+              { label: "Total Expenses", value: formatCurrency(fin?.totalExpenses ?? 0), bg: "bg-white border-slate-200" },
+              { label: "Net Assets", value: formatCurrency(fin?.netAssets ?? 0), bg: "bg-emerald-50 border-emerald-200" },
+              { label: "Cash on Hand", value: formatCurrency(fin?.cashOnHand ?? 0), bg: "bg-white border-slate-200" },
+              { label: "Months of Runway", value: String(fin?.monthsOfRunway ?? 0), bg: (fin?.monthsOfRunway ?? 0) < 6 ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200" },
             ].map((s) => (
-              <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
+              <div key={s.label} className={`border rounded-xl p-4 ${s.bg}`}>
                 <p className="text-xs text-slate-500">{s.label}</p>
-                <p className="text-xl font-bold text-slate-900 mt-1">{s.value}</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{s.value}</p>
               </div>
             ))}
           </div>
@@ -111,6 +111,20 @@ export default function BoardDashboard() {
                         %
                       </span>
                     </div>
+                    {program.annualBudget > 0 && (
+                      <div className="pt-1">
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${
+                              program.ytdSpend / program.annualBudget > 0.9
+                                ? "bg-amber-500"
+                                : "bg-indigo-500"
+                            }`}
+                            style={{ width: `${Math.min(100, Math.round((program.ytdSpend / program.annualBudget) * 100))}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {topMetric && (
                     <div className="border-t border-slate-100 pt-2">
@@ -153,11 +167,13 @@ export default function BoardDashboard() {
                       <td className="py-3 px-4">
                         <span
                           className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
-                            action.status === "auto_approved" || action.status === "approved"
+                            action.status === "auto_approved"
                               ? "bg-green-50 text-green-700"
-                              : action.status === "pending"
-                                ? "bg-amber-50 text-amber-700"
-                                : "bg-red-50 text-red-700"
+                              : action.status === "approved"
+                                ? "bg-blue-50 text-blue-700"
+                                : action.status === "pending"
+                                  ? "bg-amber-50 text-amber-700"
+                                  : "bg-red-50 text-red-700"
                           }`}
                         >
                           {action.status.replace(/_/g, " ")}
@@ -191,6 +207,33 @@ export default function BoardDashboard() {
               <p className="text-xl font-bold text-slate-900 mt-1">
                 {formatCurrency(grants.reduce((s, g) => s + g.amountRequested, 0))}
               </p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
+            <h3 className="text-sm font-semibold text-slate-900 mb-4">Pipeline by Status</h3>
+            <div className="space-y-3">
+              {(["prospect", "applied", "awarded", "active", "reporting"] as const).map((status) => {
+                const count = grants.filter((g) => g.status === status).length;
+                const total = grants.filter((g) => g.status !== "closed" && g.status !== "declined").length;
+                const colors: Record<string, string> = {
+                  prospect: "bg-slate-400",
+                  applied: "bg-amber-500",
+                  awarded: "bg-blue-500",
+                  active: "bg-emerald-500",
+                  reporting: "bg-indigo-500",
+                };
+                return (
+                  <div key={status} className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${colors[status]} shrink-0`} />
+                    <span className="text-sm text-slate-600 w-24 capitalize">{status}</span>
+                    <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${colors[status]}`} style={{ width: `${total > 0 ? (count / total) * 100 : 0}%` }} />
+                    </div>
+                    <span className="text-sm font-medium text-slate-900 w-6 text-right">{count}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
