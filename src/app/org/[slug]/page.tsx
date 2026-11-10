@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import type { Organization } from "@/lib/types";
+import type { Organization, Program, Outcome } from "@/lib/types";
 
 const sectorColors: Record<string, { bg: string; text: string; accent: string }> = {
   education: { bg: "bg-indigo-50", text: "text-indigo-700", accent: "bg-indigo-600" },
@@ -11,6 +11,10 @@ const sectorColors: Record<string, { bg: string; text: string; accent: string }>
   community: { bg: "bg-purple-50", text: "text-purple-700", accent: "bg-purple-600" },
   arts_culture: { bg: "bg-rose-50", text: "text-rose-700", accent: "bg-rose-600" },
   science: { bg: "bg-sky-50", text: "text-sky-700", accent: "bg-sky-600" },
+  housing: { bg: "bg-orange-50", text: "text-orange-700", accent: "bg-orange-600" },
+  environment: { bg: "bg-green-50", text: "text-green-700", accent: "bg-green-600" },
+  workforce: { bg: "bg-cyan-50", text: "text-cyan-700", accent: "bg-cyan-600" },
+  human_services: { bg: "bg-violet-50", text: "text-violet-700", accent: "bg-violet-600" },
 };
 
 function snakeToCamel(s: string): string {
@@ -39,18 +43,21 @@ function fmt(n: number) {
   return `$${n}`;
 }
 
+interface OrgData extends Organization {
+  programs?: Program[];
+  outcomes?: Outcome[];
+}
+
 export default function PublicOrgPage({ params }: { params: Promise<{ slug: string }> }) {
-  const [org, setOrg] = useState<Organization | null>(null);
+  const [org, setOrg] = useState<OrgData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [slug, setSlug] = useState("");
 
   useEffect(() => {
     params.then(({ slug: s }) => {
-      setSlug(s);
       fetch(`/api/organizations/public?slug=${encodeURIComponent(s)}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
-          if (data && !data.error) setOrg(camelizeKeys(data) as Organization);
+          if (data && !data.error) setOrg(camelizeKeys(data) as OrgData);
           setLoading(false);
         })
         .catch(() => setLoading(false));
@@ -93,6 +100,8 @@ export default function PublicOrgPage({ params }: { params: Promise<{ slug: stri
   const founded = org.founded ? new Date(org.founded).getFullYear() : null;
   const leadershipList = org.leadership ?? [];
   const fin = org.financials;
+  const programsList = org.programs ?? [];
+  const outcomesList = org.outcomes ?? [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -133,6 +142,79 @@ export default function PublicOrgPage({ params }: { params: Promise<{ slug: stri
                   <p className="text-sm text-slate-500 mt-1">{s.label}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Programs */}
+      {programsList.length > 0 && (
+        <section className="py-12 px-6">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-slate-900 mb-8">Our Programs</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              {programsList.map((program, i) => (
+                <div key={i} className="border border-slate-200 rounded-xl p-5 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-slate-900 leading-snug">{program.name}</h3>
+                    {program.status && (
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
+                        program.status === "active" ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-600"
+                      }`}>
+                        {program.status}
+                      </span>
+                    )}
+                  </div>
+                  {program.description && (
+                    <p className="text-sm text-slate-600 line-clamp-2">{program.description}</p>
+                  )}
+                  <div className="space-y-1 text-sm">
+                    {program.annualBudget > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Budget</span>
+                        <span className="font-medium text-slate-900">{fmt(program.annualBudget)}</span>
+                      </div>
+                    )}
+                    {program.clientsServed > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Served</span>
+                        <span className="font-medium text-slate-900">{program.clientsServed.toLocaleString()}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Outcomes */}
+      {outcomesList.length > 0 && (
+        <section className={`py-12 px-6 ${colors.bg}`}>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-slate-900 mb-8">Impact & Outcomes</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {outcomesList.flatMap(o => o.metrics ?? []).slice(0, 6).map((metric, i) => {
+                const pct = metric.target > 0 ? Math.min(100, Math.round((metric.value / metric.target) * 100)) : 0;
+                return (
+                  <div key={i} className="bg-white rounded-xl p-5 border border-slate-100">
+                    <p className="text-3xl font-bold text-slate-900">{metric.value.toLocaleString()}</p>
+                    <p className="text-sm text-slate-600 mt-1">{metric.unit}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{metric.label}</p>
+                    {metric.target > 0 && (
+                      <div className="mt-3">
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${colors.accent}`} style={{ width: `${pct}%` }} />
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1">
+                          {pct}% of {metric.target.toLocaleString()} {metric.unit} target
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>

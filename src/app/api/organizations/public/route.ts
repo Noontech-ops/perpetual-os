@@ -14,7 +14,11 @@ export async function GET(request: NextRequest) {
 
     if (!url || !key) {
       if (slug === 'bay-area-literacy-coalition') {
-        return NextResponse.json(mock.organization);
+        return NextResponse.json({
+          ...mock.organization,
+          programs: mock.programs,
+          outcomes: mock.outcomes,
+        });
       }
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
@@ -29,12 +33,22 @@ export async function GET(request: NextRequest) {
 
     if (error || !data) {
       if (slug === 'bay-area-literacy-coalition') {
-        return NextResponse.json(mock.organization);
+        return NextResponse.json({
+          ...mock.organization,
+          programs: mock.programs,
+          outcomes: mock.outcomes,
+        });
       }
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
-    return NextResponse.json(data);
+    const orgId = (data as { id: string }).id;
+    const [{ data: programs }, { data: outcomes }] = await Promise.all([
+      supabase.from('programs').select('*').eq('organization_id', orgId),
+      supabase.from('outcomes').select('*').eq('organization_id', orgId),
+    ]);
+
+    return NextResponse.json({ ...data, programs: programs ?? [], outcomes: outcomes ?? [] });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch organization';
     return NextResponse.json({ error: message }, { status: 500 });

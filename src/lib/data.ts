@@ -134,11 +134,17 @@ export async function createDonation(data: {
   });
 }
 
-export async function searchOrganizations(q?: string, sector?: string): Promise<Organization[]> {
+export async function searchOrganizations(q?: string, sector?: string): Promise<(Organization & { outcomes?: Outcome[] })[]> {
   const params = new URLSearchParams();
   if (q) params.set('q', q);
   if (sector) params.set('sector', sector);
   const qs = params.toString();
-  const data = await apiFetch<Organization[]>(`/api/search${qs ? `?${qs}` : ''}`);
-  return data ?? [];
+  const data = await apiFetch<(Organization & { outcomes?: Outcome[] })[]>(`/api/search${qs ? `?${qs}` : ''}`);
+  if (data && data.length > 0) return data;
+  const orgs = [mock.organization].filter(o => {
+    if (sector && o.sector !== sector) return false;
+    if (q && !o.name.toLowerCase().includes(q.toLowerCase()) && !o.mission.toLowerCase().includes(q.toLowerCase())) return false;
+    return true;
+  });
+  return orgs.map(o => ({ ...o, outcomes: mock.outcomes.filter(out => o.programIds?.includes(out.programId)) }));
 }
