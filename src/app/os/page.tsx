@@ -192,13 +192,13 @@ export default function OSDashboard() {
   return (
     <div className="space-y-6">
       <div className="border-b border-slate-200 -mt-2">
-        <nav className="flex gap-1">
+        <nav className="flex gap-1 overflow-x-auto flex-nowrap">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+                "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0",
                 activeTab === tab
                   ? "border-brand-600 text-brand-700"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"

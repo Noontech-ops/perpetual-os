@@ -11,11 +11,11 @@ export default function Home() {
             </div>
             <span className="text-xl font-semibold text-slate-900">Perpetual</span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/outcomes" className="text-sm text-slate-600 hover:text-slate-900">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <Link href="/outcomes" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
               For Donors
             </Link>
-            <Link href="/os" className="text-sm text-slate-600 hover:text-slate-900">
+            <Link href="/os" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
               For Nonprofits
             </Link>
             <Link

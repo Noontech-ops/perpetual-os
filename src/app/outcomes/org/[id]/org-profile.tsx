@@ -353,12 +353,12 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
 
             <div>
               <label className="block text-sm text-slate-600 mb-1.5">Amount</label>
-              <div className="flex gap-2 mb-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
                 {["25", "50", "100", "250", "500"].map((a) => (
                   <button
                     key={a}
                     onClick={() => setGiveAmount(a)}
-                    className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`py-1.5 rounded-lg text-sm font-medium transition-colors ${
                       giveAmount === a
                         ? "bg-emerald-600 text-white"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"

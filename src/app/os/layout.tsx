@@ -33,7 +33,8 @@ const icons: Record<string, ReactNode> = {
 
 export default function OSLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { user, signOut } = useAuth();
   const [chatAgent, setChatAgent] = useState<AgentType | null>(null);
   const initials = user?.user_metadata?.full_name
@@ -42,9 +43,19 @@ export default function OSLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-slate-50">
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 bg-black/30 z-40 md:hidden" onClick={() => setMobileOpen(false)} />
+      )}
+
       {/* Sidebar */}
       <aside
-        className={`${collapsed ? "w-16" : "w-60"} bg-white border-r border-slate-200 flex flex-col transition-all duration-200 shrink-0`}
+        className={`
+          ${collapsed ? "w-16" : "w-60"}
+          bg-white border-r border-slate-200 flex flex-col transition-all duration-200 shrink-0
+          fixed md:sticky top-0 h-screen z-50
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
+        `}
       >
         <div className="p-4 border-b border-slate-200 flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center shrink-0">
@@ -54,8 +65,8 @@ export default function OSLayout({ children }: { children: ReactNode }) {
             <span className="text-base font-semibold text-slate-900">Perpetual OS</span>
           )}
           <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="ml-auto text-slate-400 hover:text-slate-600"
+            onClick={() => { setCollapsed(!collapsed); if (!collapsed) setMobileOpen(false); }}
+            className="ml-auto text-slate-400 hover:text-slate-600 hidden md:block"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {collapsed ? (
@@ -65,14 +76,23 @@ export default function OSLayout({ children }: { children: ReactNode }) {
               )}
             </svg>
           </button>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="ml-auto text-slate-400 hover:text-slate-600 md:hidden"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <nav className="flex-1 p-2 space-y-0.5">
+        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/os" && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                   isActive
                     ? "bg-brand-50 text-brand-700 font-medium"
@@ -98,8 +118,16 @@ export default function OSLayout({ children }: { children: ReactNode }) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { setMobileOpen(true); setCollapsed(false); }}
+              className="md:hidden text-slate-500 hover:text-slate-700"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
             <h1 className="text-lg font-semibold text-slate-900">Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
