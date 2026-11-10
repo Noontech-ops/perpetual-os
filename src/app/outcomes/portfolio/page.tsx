@@ -38,9 +38,10 @@ export default function PortfolioPage() {
   }, []);
 
   const hasRealData = transactions.length > 0;
+  const completedTxs = transactions.filter(t => t.status === 'completed' || t.status === 'pending');
 
   const holdings = hasRealData
-    ? buildHoldings(transactions)
+    ? buildHoldings(completedTxs)
     : fallbackHoldings;
 
   const totalGiven = holdings.reduce((s, h) => s + h.totalGiven, 0);
@@ -148,6 +149,53 @@ export default function PortfolioPage() {
                 </div>
                 <p className="text-xs text-slate-400 mt-3">2026 year-to-date</p>
               </div>
+
+              {hasRealData && transactions.length > 0 && (
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                  <div className="px-5 py-4 border-b border-slate-200">
+                    <h2 className="font-semibold text-slate-900">Giving History</h2>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200">
+                          <th className="text-left py-3 px-5 font-medium text-slate-500">Date</th>
+                          <th className="text-left py-3 px-5 font-medium text-slate-500">Organization</th>
+                          <th className="text-right py-3 px-5 font-medium text-slate-500">Amount</th>
+                          <th className="text-left py-3 px-5 font-medium text-slate-500">Method</th>
+                          <th className="text-left py-3 px-5 font-medium text-slate-500">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {transactions.map((tx) => (
+                          <tr key={tx.id} className="border-b border-slate-100 hover:bg-slate-50">
+                            <td className="py-3 px-5 text-slate-600 whitespace-nowrap">
+                              {new Date(tx.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </td>
+                            <td className="py-3 px-5">
+                              <Link href={`/outcomes/org/${tx.organizationId}`} className="font-medium text-slate-900 hover:text-emerald-600">
+                                {tx.organizationId}
+                              </Link>
+                            </td>
+                            <td className="py-3 px-5 text-right font-medium text-slate-900">{fmt(tx.amount)}</td>
+                            <td className="py-3 px-5 text-slate-600 capitalize">{tx.method}</td>
+                            <td className="py-3 px-5">
+                              <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
+                                tx.status === "completed" ? "bg-green-50 text-green-700" :
+                                tx.status === "pending" ? "bg-amber-50 text-amber-700" :
+                                tx.status === "failed" ? "bg-red-50 text-red-700" :
+                                "bg-slate-100 text-slate-600"
+                              }`}>
+                                {tx.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-8">

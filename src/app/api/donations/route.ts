@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       fee_percent: feePercent * 100,
       net_to_org: body.amount - fee,
       designation: body.designation,
-      status: 'pending',
+      status: body.status || 'pending',
     })
     .select()
     .single();
