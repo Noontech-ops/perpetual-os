@@ -1,149 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { searchOrganizations } from "@/lib/data";
+import type { Organization } from "@/lib/types";
 
-const causeAreas = ["All", "Education", "Health", "Essential Rights", "Community", "Science", "Art / Culture"] as const;
+const sectorMap: Record<string, string> = {
+  All: "",
+  Education: "education",
+  Health: "health",
+  "Essential Rights": "essential_rights",
+  Community: "community",
+  Science: "science",
+  "Art / Culture": "arts_culture",
+};
+const causeAreas = Object.keys(sectorMap) as string[];
 const geographies = ["All", "Local", "Regional", "National", "International"] as const;
-
-interface OrgCard {
-  id: string;
-  name: string;
-  location: string;
-  sector: string;
-  mission: string;
-  outcomeMetric: string;
-  outcomeValue: string;
-  outcomeTrend: number;
-  annualBudget: number;
-  fundingSources: { label: string; pct: number; color: string }[];
-  geography: string;
-}
-
-const orgs: OrgCard[] = [
-  {
-    id: "bay-area-literacy",
-    name: "Bay Area Literacy Coalition",
-    location: "Oakland, CA",
-    sector: "Education",
-    mission: "Advancing adult and youth literacy across the Bay Area through evidence-based programs.",
-    outcomeMetric: "adults reached reading proficiency",
-    outcomeValue: "847",
-    outcomeTrend: 12,
-    annualBudget: 820000,
-    fundingSources: [
-      { label: "Grants", pct: 45, color: "bg-emerald-500" },
-      { label: "Individual", pct: 30, color: "bg-blue-500" },
-      { label: "Events", pct: 15, color: "bg-amber-500" },
-      { label: "Other", pct: 10, color: "bg-slate-400" },
-    ],
-    geography: "Local",
-  },
-  {
-    id: "stable-ground-housing",
-    name: "Stable Ground Housing",
-    location: "Denver, CO",
-    sector: "Essential Rights",
-    mission: "Preventing homelessness and building long-term housing stability for families.",
-    outcomeMetric: "avg months of housing stability",
-    outcomeValue: "18.3",
-    outcomeTrend: 8,
-    annualBudget: 2100000,
-    fundingSources: [
-      { label: "Government", pct: 40, color: "bg-emerald-500" },
-      { label: "Grants", pct: 35, color: "bg-blue-500" },
-      { label: "Individual", pct: 25, color: "bg-amber-500" },
-    ],
-    geography: "Regional",
-  },
-  {
-    id: "community-health-partners",
-    name: "Community Health Partners",
-    location: "Atlanta, GA",
-    sector: "Health",
-    mission: "Expanding access to primary and preventive care in underserved communities.",
-    outcomeMetric: "patients served with no prior access",
-    outcomeValue: "3,214",
-    outcomeTrend: 21,
-    annualBudget: 4500000,
-    fundingSources: [
-      { label: "Earned", pct: 50, color: "bg-emerald-500" },
-      { label: "Grants", pct: 30, color: "bg-blue-500" },
-      { label: "Individual", pct: 20, color: "bg-amber-500" },
-    ],
-    geography: "Regional",
-  },
-  {
-    id: "pathways-workforce",
-    name: "Pathways Workforce Development",
-    location: "Chicago, IL",
-    sector: "Community",
-    mission: "Connecting underemployed adults to living-wage careers through training and placement.",
-    outcomeMetric: "job placements retained at 90 days",
-    outcomeValue: "412",
-    outcomeTrend: 15,
-    annualBudget: 1350000,
-    fundingSources: [
-      { label: "Government", pct: 35, color: "bg-emerald-500" },
-      { label: "Corporate", pct: 30, color: "bg-blue-500" },
-      { label: "Grants", pct: 25, color: "bg-amber-500" },
-      { label: "Individual", pct: 10, color: "bg-slate-400" },
-    ],
-    geography: "Local",
-  },
-  {
-    id: "watershed-collective",
-    name: "Watershed Collective",
-    location: "Portland, OR",
-    sector: "Science",
-    mission: "Restoring urban waterways and building community science capacity.",
-    outcomeMetric: "stream-miles restored to health",
-    outcomeValue: "23.7",
-    outcomeTrend: 6,
-    annualBudget: 950000,
-    fundingSources: [
-      { label: "Grants", pct: 55, color: "bg-emerald-500" },
-      { label: "Government", pct: 25, color: "bg-blue-500" },
-      { label: "Individual", pct: 20, color: "bg-amber-500" },
-    ],
-    geography: "Regional",
-  },
-  {
-    id: "open-stage-arts",
-    name: "Open Stage Arts Collective",
-    location: "Brooklyn, NY",
-    sector: "Art / Culture",
-    mission: "Making world-class performing arts accessible to all New Yorkers regardless of income.",
-    outcomeMetric: "free performance attendees",
-    outcomeValue: "11,480",
-    outcomeTrend: 34,
-    annualBudget: 680000,
-    fundingSources: [
-      { label: "Individual", pct: 40, color: "bg-emerald-500" },
-      { label: "Grants", pct: 30, color: "bg-blue-500" },
-      { label: "Earned", pct: 20, color: "bg-amber-500" },
-      { label: "Corporate", pct: 10, color: "bg-slate-400" },
-    ],
-    geography: "Local",
-  },
-];
 
 function formatBudget(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   return `$${(n / 1_000).toFixed(0)}K`;
 }
 
+function formatSector(s: string) {
+  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function getLocation(address: Organization["address"] | undefined): string {
+  if (!address) return "";
+  return [address.city, address.state].filter(Boolean).join(", ");
+}
+
 export default function OutcomesExplorePage() {
   const [search, setSearch] = useState("");
-  const [cause, setCause] = useState<string>("All");
+  const [cause, setCause] = useState("All");
   const [geo, setGeo] = useState<string>("All");
+  const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = orgs.filter((o) => {
-    if (cause !== "All" && o.sector !== cause) return false;
-    if (geo !== "All" && o.geography !== geo) return false;
-    if (search && !o.name.toLowerCase().includes(search.toLowerCase()) && !o.mission.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  const fetchOrgs = useCallback(async () => {
+    setLoading(true);
+    const sector = sectorMap[cause] || undefined;
+    const q = search.trim() || undefined;
+    const results = await searchOrganizations(q, sector);
+    setOrgs(results);
+    setLoading(false);
+  }, [search, cause]);
+
+  useEffect(() => {
+    const timer = setTimeout(fetchOrgs, 300);
+    return () => clearTimeout(timer);
+  }, [fetchOrgs]);
+
+  const filtered = geo === "All" ? orgs : orgs;
 
   return (
     <div>
@@ -215,86 +124,87 @@ export default function OutcomesExplorePage() {
         </div>
 
         {/* Results count */}
-        <p className="text-sm text-slate-500 mb-6">{filtered.length} nonprofit{filtered.length !== 1 ? "s" : ""} found</p>
+        <p className="text-sm text-slate-500 mb-6">
+          {loading ? "Searching..." : `${filtered.length} nonprofit${filtered.length !== 1 ? "s" : ""} found`}
+        </p>
 
         {/* Org cards grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((org) => (
-            <div
-              key={org.id}
-              className="border border-slate-200 rounded-xl bg-white hover:shadow-md transition-shadow flex flex-col"
-            >
-              <div className="p-5 flex-1 space-y-4">
-                {/* Header */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-slate-900 leading-snug">{org.name}</h3>
-                    <p className="text-sm text-slate-500 mt-0.5">{org.location}</p>
-                  </div>
-                  <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 shrink-0">
-                    {org.sector}
-                  </span>
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border border-slate-200 rounded-xl bg-white p-5 animate-pulse space-y-4">
+                <div className="h-5 bg-slate-200 rounded w-3/4" />
+                <div className="h-4 bg-slate-100 rounded w-1/2" />
+                <div className="bg-slate-50 rounded-lg p-3 space-y-2">
+                  <div className="h-8 bg-slate-200 rounded w-1/3" />
+                  <div className="h-4 bg-slate-100 rounded w-2/3" />
                 </div>
+                <div className="h-3 bg-slate-100 rounded w-full" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((org) => {
+              const budget = org.financials?.annualBudget ?? 0;
+              const location = getLocation(org.address);
 
-                {/* Outcome metric */}
-                <div className="bg-slate-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-slate-900">{org.outcomeValue}</p>
-                  <p className="text-sm text-slate-600 mt-0.5">{org.outcomeMetric}</p>
-                  <p className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                      <polyline points="17 6 23 6 23 12" />
-                    </svg>
-                    {org.outcomeTrend}% year-over-year
-                  </p>
-                </div>
-
-                {/* Budget + Funding */}
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-slate-500">Annual budget</span>
-                    <span className="font-medium text-slate-900">{formatBudget(org.annualBudget)}</span>
-                  </div>
-                  <div className="flex rounded-full overflow-hidden h-2">
-                    {org.fundingSources.map((s) => (
-                      <div
-                        key={s.label}
-                        className={`${s.color}`}
-                        style={{ width: `${s.pct}%` }}
-                        title={`${s.label}: ${s.pct}%`}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
-                    {org.fundingSources.map((s) => (
-                      <span key={s.label} className="text-[11px] text-slate-400">
-                        {s.label} {s.pct}%
+              return (
+                <div
+                  key={org.id}
+                  className="border border-slate-200 rounded-xl bg-white hover:shadow-md transition-shadow flex flex-col"
+                >
+                  <div className="p-5 flex-1 space-y-4">
+                    {/* Header */}
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-slate-900 leading-snug">{org.name}</h3>
+                        {location && <p className="text-sm text-slate-500 mt-0.5">{location}</p>}
+                      </div>
+                      <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 shrink-0">
+                        {formatSector(org.sector)}
                       </span>
-                    ))}
+                    </div>
+
+                    {/* Mission */}
+                    <p className="text-sm text-slate-600 line-clamp-3">{org.mission}</p>
+
+                    {/* Budget */}
+                    {budget > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-slate-500">Annual budget</span>
+                          <span className="font-medium text-slate-900">{formatBudget(budget)}</span>
+                        </div>
+                        <div className="flex rounded-full overflow-hidden h-2">
+                          <div className="bg-emerald-500" style={{ width: "100%" }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="px-5 py-3 border-t border-slate-100 flex items-center gap-3">
+                    <Link
+                      href={`/outcomes/org/${org.id}`}
+                      className="flex-1 text-center text-sm font-medium text-slate-700 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                    >
+                      View Profile
+                    </Link>
+                    <Link
+                      href={`/outcomes/org/${org.id}#give`}
+                      className="flex-1 text-center text-sm font-medium text-white py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition-colors"
+                    >
+                      Give
+                    </Link>
                   </div>
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        )}
 
-              {/* Actions */}
-              <div className="px-5 py-3 border-t border-slate-100 flex items-center gap-3">
-                <Link
-                  href={`/outcomes/org/${org.id}`}
-                  className="flex-1 text-center text-sm font-medium text-slate-700 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
-                >
-                  View Profile
-                </Link>
-                <Link
-                  href={`/outcomes/org/${org.id}#give`}
-                  className="flex-1 text-center text-sm font-medium text-white py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition-colors"
-                >
-                  Give
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <div className="text-center py-16">
             <p className="text-slate-500">No nonprofits match your filters. Try broadening your search.</p>
           </div>

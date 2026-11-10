@@ -4,16 +4,28 @@ import type {
 } from './types';
 import * as mock from './mock-data';
 
-const hasSupabase = typeof window !== 'undefined'
-  && !!process.env.NEXT_PUBLIC_SUPABASE_URL
-  && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+function snakeToCamel(s: string): string {
+  return s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+}
 
-async function apiFetch<T>(path: string): Promise<T | null> {
-  if (!hasSupabase) return null;
+function camelizeKeys(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(camelizeKeys);
+  if (obj !== null && typeof obj === 'object' && !(obj instanceof Date)) {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+      out[snakeToCamel(k)] = camelizeKeys(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T | null> {
   try {
-    const res = await fetch(path);
+    const res = await fetch(path, init);
     if (!res.ok) return null;
-    return await res.json();
+    const json = await res.json();
+    return camelizeKeys(json) as T;
   } catch {
     return null;
   }
@@ -66,6 +78,8 @@ export async function getAgentActions(status?: string): Promise<AgentAction[]> {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
+  const data = await apiFetch<DashboardStats>('/api/dashboard-stats');
+  if (data) return data;
   return mock.dashboardStats;
 }
 
@@ -74,15 +88,18 @@ export async function getAgentConfigs(): Promise<AgentConfig[]> {
 }
 
 export async function getDonorProfiles(): Promise<DonorProfile[]> {
+  const data = await apiFetch<DonorProfile[]>('/api/donor-profiles');
+  if (data) return data;
   return mock.donorProfiles;
 }
 
 export async function getGivingTransactions(): Promise<GivingTransaction[]> {
+  const data = await apiFetch<GivingTransaction[]>('/api/donations');
+  if (data) return data;
   return mock.givingTransactions;
 }
 
 export async function updateAgentAction(id: string, status: 'approved' | 'rejected'): Promise<boolean> {
-  if (!hasSupabase) return true;
   try {
     const res = await fetch('/api/agent-actions', {
       method: 'PATCH',
@@ -93,4 +110,35 @@ export async function updateAgentAction(id: string, status: 'approved' | 'reject
   } catch {
     return false;
   }
+}
+
+export async function runAgent(agentType: string, task: string): Promise<string> {
+  const res = await apiFetch<{ response: string }>('/api/agents/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ agentType, task }),
+  });
+  return res?.response ?? 'Agent unavailable. Check API key configuration.';
+}
+
+export async function createDonation(data: {
+  organization_id: string;
+  amount: number;
+  method: string;
+  designation?: string;
+}): Promise<GivingTransaction | null> {
+  return apiFetch<GivingTransaction>('/api/donations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function searchOrganizations(q?: string, sector?: string): Promise<Organization[]> {
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (sector) params.set('sector', sector);
+  const qs = params.toString();
+  const data = await apiFetch<Organization[]>(`/api/search${qs ? `?${qs}` : ''}`);
+  return data ?? [];
 }

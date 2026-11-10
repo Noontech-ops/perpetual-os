@@ -20,7 +20,8 @@ export default function SignupPage() {
     setError('');
 
     const { createClient } = await import('@/lib/supabase/client');
-    const { error } = await createClient().auth.signUp({
+    const supabase = createClient();
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -28,13 +29,20 @@ export default function SignupPage() {
       },
     });
 
-    if (error) {
-      setError(error.message);
+    if (signUpError) {
+      setError(signUpError.message);
       setLoading(false);
-    } else {
-      setSuccess(true);
-      setLoading(false);
+      return;
     }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (!signInError) {
+      window.location.href = role === 'org_admin' ? '/onboarding' : '/outcomes';
+      return;
+    }
+
+    setSuccess(true);
+    setLoading(false);
   }
 
   if (success) {
@@ -48,6 +56,9 @@ export default function SignupPage() {
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Check your email</h2>
           <p className="text-gray-500">We sent a confirmation link to <strong>{email}</strong></p>
+          <Link href="/login" className="inline-block mt-4 text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+            Go to sign in
+          </Link>
         </div>
       </div>
     );
@@ -111,7 +122,6 @@ export default function SignupPage() {
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
-                <div className="text-lg mb-1">🏛️</div>
                 Nonprofit
               </button>
               <button
@@ -123,7 +133,6 @@ export default function SignupPage() {
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
-                <div className="text-lg mb-1">💚</div>
                 Donor
               </button>
             </div>
