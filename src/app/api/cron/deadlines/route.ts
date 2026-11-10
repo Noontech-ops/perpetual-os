@@ -50,23 +50,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ sent: 0, wouldSend: previews.length, previews });
     }
 
-    const { Resend } = await import('resend');
-    const resend = new Resend(resendKey);
+    const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'Perpetual OS <notifications@perpetualos.com>';
     const results = [];
 
     for (const data of upcoming) {
-      const { error } = await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL ?? 'Perpetual OS <notifications@perpetualos.com>',
-        to: notifyEmail,
-        subject: deadlineReminderSubject(data),
-        html: deadlineReminderHtml(data),
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: notifyEmail,
+          subject: deadlineReminderSubject(data),
+          html: deadlineReminderHtml(data),
+        }),
       });
+      const ok = res.ok;
+      const body = await res.json().catch(() => null);
       results.push({
         grant: data.grant.name,
         deadline: data.deadline.description,
         daysUntil: data.daysUntil,
-        sent: !error,
-        error: error?.message,
+        sent: ok,
+        error: ok ? undefined : (body?.message ?? res.statusText),
       });
     }
 
