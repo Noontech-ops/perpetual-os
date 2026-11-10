@@ -26,6 +26,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Progress } from "@/components/ui/progress";
 import { AgentAction } from "@/components/ui/agent-action";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
 
 const tabs = [
   "Overview",
@@ -72,8 +73,11 @@ export default function OSDashboard() {
   const [outcomes, setOutcomes] = useState<Outcome[]>([]);
   const [agentActions, setAgentActions] = useState<AgentActionType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     Promise.all([
       getGrants(),
       getConstituents(),
@@ -82,6 +86,7 @@ export default function OSDashboard() {
       getOutcomes(),
       getAgentActions(),
     ]).then(([g, c, t, p, o, a]) => {
+      if (cancelled) return;
       setGrants(g);
       setConstituents(c);
       setTransactions(t);
@@ -89,8 +94,13 @@ export default function OSDashboard() {
       setOutcomes(o);
       setAgentActions(a);
       setLoading(false);
+    }).catch((err) => {
+      if (cancelled) return;
+      setError(err instanceof Error ? err.message : "Failed to load dashboard data");
+      setLoading(false);
     });
-  }, []);
+    return () => { cancelled = true; };
+  }, [retryCount]);
 
   async function handleUpdateAction(id: string, status: "approved" | "rejected") {
     const ok = await updateAgentAction(id, status);
@@ -158,6 +168,23 @@ export default function OSDashboard() {
             </CardContent>
           </Card>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="border-b border-slate-200 -mt-2">
+          <nav className="flex gap-1 overflow-x-auto flex-nowrap">
+            {tabs.map((tab) => (
+              <div key={tab} className="px-4 py-2.5 text-sm font-medium text-slate-300 whitespace-nowrap">
+                {tab}
+              </div>
+            ))}
+          </nav>
+        </div>
+        <ErrorState title="Dashboard failed to load" message={error} onRetry={() => setRetryCount(c => c + 1)} />
       </div>
     );
   }
@@ -452,15 +479,34 @@ function GrantsAgentTab({
 }) {
   const [agentResult, setAgentResult] = useState<string | null>(null);
   const [agentRunning, setAgentRunning] = useState(false);
+  const [agentError, setAgentError] = useState<string | null>(null);
 
   async function handleRunAgent() {
     setAgentRunning(true);
     setAgentResult(null);
-    const result = await runAgent(
-      "grants",
-      "Find new grant opportunities and draft recommendations for our organization."
-    );
-    setAgentResult(result);
+    setAgentError(null);
+    try {
+      const result = await runAgent(
+        "grants",
+        "Find new grant opportunities and draft recommendations for our organization."
+      );
+      if (!result) {
+        setAgentError("Agent unavailable — check your Anthropic API key at console.anthropic.com");
+      } else {
+        setAgentResult(result);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Agent request failed";
+      if (msg.includes("credit") || msg.includes("billing")) {
+        setAgentError("Agent unavailable — add API credits at console.anthropic.com");
+      } else if (msg.includes("rate") || msg.includes("429")) {
+        setAgentError("Agent is rate limited — please try again in a moment");
+      } else if (msg.includes("key") || msg.includes("401") || msg.includes("403")) {
+        setAgentError("Agent unavailable — check your Anthropic API key");
+      } else {
+        setAgentError(msg);
+      }
+    }
     setAgentRunning(false);
   }
 
@@ -543,6 +589,18 @@ function GrantsAgentTab({
           </div>
         </CardHeader>
         <CardContent>
+          {agentError && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                <path strokeLinecap="round" strokeWidth="2" d="M12 8v4M12 16h.01" />
+              </svg>
+              <div>
+                <p className="text-sm font-medium text-red-800">{agentError}</p>
+                <button onClick={() => setAgentError(null)} className="mt-1 text-xs text-red-600 hover:text-red-700">Dismiss</button>
+              </div>
+            </div>
+          )}
           {agentResult && (
             <div className="mb-4 p-4 bg-brand-50 border border-brand-200 rounded-lg">
               <p className="text-xs font-medium text-brand-700 mb-1">Agent Result</p>
