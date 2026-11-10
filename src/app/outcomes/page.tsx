@@ -131,15 +131,33 @@ export default function OutcomesExplorePage() {
         {/* Org cards grid */}
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="border border-slate-200 rounded-xl bg-white p-5 animate-pulse space-y-4">
-                <div className="h-5 bg-slate-200 rounded w-3/4" />
-                <div className="h-4 bg-slate-100 rounded w-1/2" />
-                <div className="bg-slate-50 rounded-lg p-3 space-y-2">
-                  <div className="h-8 bg-slate-200 rounded w-1/3" />
-                  <div className="h-4 bg-slate-100 rounded w-2/3" />
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="border border-slate-200 rounded-xl bg-white flex flex-col">
+                <div className="p-5 flex-1 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1.5 flex-1">
+                      <div className="h-5 bg-slate-200 rounded w-3/4 animate-pulse" />
+                      <div className="h-3 bg-slate-100 rounded w-1/3 animate-pulse" />
+                    </div>
+                    <div className="h-5 w-16 bg-slate-100 rounded-full animate-pulse shrink-0" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-3 bg-slate-100 rounded w-full animate-pulse" />
+                    <div className="h-3 bg-slate-100 rounded w-5/6 animate-pulse" />
+                    <div className="h-3 bg-slate-100 rounded w-2/3 animate-pulse" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-3 bg-slate-100 rounded w-20 animate-pulse" />
+                      <div className="h-3 bg-slate-200 rounded w-12 animate-pulse" />
+                    </div>
+                    <div className="h-2 bg-slate-100 rounded-full animate-pulse" />
+                  </div>
                 </div>
-                <div className="h-3 bg-slate-100 rounded w-full" />
+                <div className="px-5 py-3 border-t border-slate-100 flex items-center gap-3">
+                  <div className="flex-1 h-9 bg-slate-100 rounded-lg animate-pulse" />
+                  <div className="flex-1 h-9 bg-slate-200 rounded-lg animate-pulse" />
+                </div>
               </div>
             ))}
           </div>

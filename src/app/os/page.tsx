@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/ui/stat-card";
 import { Progress } from "@/components/ui/progress";
 import { AgentAction } from "@/components/ui/agent-action";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const tabs = [
   "Overview",
@@ -103,23 +104,59 @@ export default function OSDashboard() {
   if (loading) {
     return (
       <div className="space-y-6">
+        {/* Tab bar renders immediately */}
         <div className="border-b border-slate-200 -mt-2">
-          <nav className="flex gap-1">
+          <nav className="flex gap-1 overflow-x-auto flex-nowrap">
             {tabs.map((tab) => (
-              <div key={tab} className="px-4 py-2.5 text-sm font-medium text-slate-300">
+              <div key={tab} className="px-4 py-2.5 text-sm font-medium text-slate-300 whitespace-nowrap">
                 {tab}
               </div>
             ))}
           </nav>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 4 skeleton stat cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+            <div key={i} className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-7 w-28" />
+              <Skeleton className="h-3 w-16" />
+            </div>
           ))}
         </div>
+        {/* 3 skeleton agent action cards + sidebar */}
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-64 bg-slate-100 rounded-xl animate-pulse" />
-          <div className="h-64 bg-slate-100 rounded-xl animate-pulse" />
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader><Skeleton className="h-5 w-32" /></CardHeader>
+              <CardContent className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="border border-slate-100 rounded-lg p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-5 w-5 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+          <Card>
+            <CardHeader><Skeleton className="h-5 w-36" /></CardHeader>
+            <CardContent className="space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-start justify-between gap-2">
+                  <div className="space-y-1 flex-1">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                  <Skeleton className="h-5 w-14 rounded-full" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
