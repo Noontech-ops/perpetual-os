@@ -126,6 +126,7 @@ export async function createDonation(data: {
   amount: number;
   method: string;
   designation?: string;
+  status?: string;
 }): Promise<GivingTransaction | null> {
   return apiFetch<GivingTransaction>('/api/donations', {
     method: 'POST',

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createDonation } from "@/lib/data";
+import CheckoutForm from "@/components/payment/checkout-form";
+import PaymentConfirmation from "@/components/payment/payment-confirmation";
 import type { Organization } from "@/lib/types";
 
 const tabs = ["Overview", "Financials", "Programs", "Outcomes", "Leadership"] as const;
@@ -39,7 +41,11 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
   const [tab, setTab] = useState<Tab>("Overview");
   const [giveAmount, setGiveAmount] = useState("100");
   const [paymentMethod, setPaymentMethod] = useState<string>("Card");
-  const [giveStatus, setGiveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [sidebarPhase, setSidebarPhase] = useState<"select" | "checkout" | "contact" | "confirmed">("select");
+  const [donorEmail, setDonorEmail] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactSubmitting, setContactSubmitting] = useState(false);
 
   const [org, setOrg] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,20 +64,43 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
     load();
   }, [orgId]);
 
-  async function handleGive() {
-    const amount = parseFloat(giveAmount);
-    if (!amount || amount <= 0 || !org) return;
-    setGiveStatus("loading");
-    const result = await createDonation({
+  const isStripeMethod = paymentMethod === "Card" || paymentMethod === "ACH";
+  const parsedAmount = parseFloat(giveAmount) || 0;
+
+  function handleContinue() {
+    if (parsedAmount <= 0 || !org) return;
+    if (isStripeMethod) {
+      setSidebarPhase("checkout");
+    } else {
+      setSidebarPhase("contact");
+    }
+  }
+
+  function handlePaymentSuccess(paymentIntentId: string) {
+    console.log("Payment succeeded:", paymentIntentId);
+    setSidebarPhase("confirmed");
+  }
+
+  async function handleContactSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!org) return;
+    setContactSubmitting(true);
+    await createDonation({
       organization_id: org.id,
-      amount,
+      amount: parsedAmount,
       method: methodApiKeys[paymentMethod] || "card",
       designation: "general",
+      status: "contact_requested",
     });
-    setGiveStatus(result ? "success" : "error");
-    if (result) {
-      setTimeout(() => setGiveStatus("idle"), 3000);
-    }
+    setContactSubmitting(false);
+    setSidebarPhase("confirmed");
+  }
+
+  function handleGiveAgain() {
+    setSidebarPhase("select");
+    setDonorEmail("");
+    setContactName("");
+    setContactMessage("");
   }
 
   if (loading) {
@@ -302,80 +331,145 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
           <div className="sticky top-20 border border-slate-200 rounded-xl p-6 space-y-5 bg-white shadow-sm">
             <h3 className="font-semibold text-slate-900">Give to {org.name}</h3>
 
-            <div>
-              <label className="block text-sm text-slate-600 mb-1.5">Amount</label>
-              <div className="flex gap-2 mb-2">
-                {["25", "50", "100", "250", "500"].map((a) => (
-                  <button
-                    key={a}
-                    onClick={() => setGiveAmount(a)}
-                    className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                      giveAmount === a
-                        ? "bg-emerald-600 text-white"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    ${a}
-                  </button>
-                ))}
-              </div>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
-                <input
-                  type="text"
-                  value={giveAmount}
-                  onChange={(e) => setGiveAmount(e.target.value.replace(/[^0-9.]/g, ""))}
-                  className="w-full pl-7 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-            </div>
+            {sidebarPhase === "confirmed" && (
+              <PaymentConfirmation
+                orgName={org.name}
+                amount={parsedAmount}
+                method={methodApiKeys[paymentMethod] || "card"}
+                email={donorEmail || undefined}
+                onGiveAgain={handleGiveAgain}
+              />
+            )}
 
-            <div>
-              <label className="block text-sm text-slate-600 mb-1.5">Payment Method</label>
-              <div className="grid grid-cols-3 gap-1.5">
-                {paymentMethods.map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setPaymentMethod(m)}
-                    className={`py-2 rounded-lg text-xs font-medium transition-colors ${
-                      paymentMethod === m
-                        ? "bg-emerald-600 text-white"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {sidebarPhase === "checkout" && (
+              <CheckoutForm
+                orgId={org.id}
+                orgName={org.name}
+                amount={parsedAmount}
+                paymentMethod={paymentMethod === "ACH" ? "ach" : "card"}
+                donorEmail={donorEmail || undefined}
+                onSuccess={handlePaymentSuccess}
+                onCancel={() => setSidebarPhase("select")}
+              />
+            )}
 
-            <button
-              onClick={handleGive}
-              disabled={giveStatus === "loading" || giveStatus === "success"}
-              className={`w-full py-3 rounded-xl font-medium text-base transition-colors ${
-                giveStatus === "success"
-                  ? "bg-green-600 text-white"
-                  : giveStatus === "error"
-                    ? "bg-red-600 text-white hover:bg-red-700"
-                    : "bg-emerald-600 text-white hover:bg-emerald-700"
-              } disabled:opacity-70`}
-            >
-              {giveStatus === "loading" && "Processing..."}
-              {giveStatus === "success" && "Donation Recorded!"}
-              {giveStatus === "error" && "Failed — Try Again"}
-              {giveStatus === "idle" && `Give $${giveAmount || "0"}`}
-            </button>
+            {sidebarPhase === "contact" && (
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                <p className="text-sm text-slate-600">
+                  {paymentMethod} gifts require coordination. Fill out this form and {org.name} will be in touch.
+                </p>
+                <div>
+                  <label className="block text-sm text-slate-600 mb-1.5">Your name</label>
+                  <input
+                    type="text" required value={contactName} onChange={e => setContactName(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-600 mb-1.5">Email</label>
+                  <input
+                    type="email" required value={donorEmail} onChange={e => setDonorEmail(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-600 mb-1.5">Message (optional)</label>
+                  <textarea
+                    value={contactMessage} onChange={e => setContactMessage(e.target.value)} rows={3}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div className="bg-slate-50 rounded-lg p-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Amount</span>
+                    <span className="font-medium text-slate-900">${parsedAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-slate-500">Method</span>
+                    <span className="font-medium text-slate-900">{paymentMethod}</span>
+                  </div>
+                </div>
+                <button
+                  type="submit" disabled={contactSubmitting}
+                  className="w-full py-3 rounded-xl font-medium text-base bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-70 transition-colors"
+                >
+                  {contactSubmitting ? "Submitting..." : "Submit Request"}
+                </button>
+                <button type="button" onClick={() => setSidebarPhase("select")} className="w-full text-sm text-slate-500 hover:text-slate-700">
+                  Back
+                </button>
+              </form>
+            )}
 
-            <div className="text-xs text-slate-400 space-y-1">
-              {paymentMethod === "Card" && <p>Processing fee: 2.2% + $0.30</p>}
-              {paymentMethod === "ACH" && <p>Processing fee: 0.8% (capped at $5)</p>}
-              {paymentMethod === "DAF" && <p>Flat fee: $5 per grant recommendation</p>}
-              {paymentMethod === "Stock" && <p>Flat fee: $25 per transfer</p>}
-              {paymentMethod === "Crypto" && <p>Processing fee: 1.5%</p>}
-              {paymentMethod === "QCD" && <p>No processing fee</p>}
-              <p>Tax receipt issued automatically via email.</p>
-              {org.ein && <p>EIN: {org.ein}</p>}
-            </div>
+            {sidebarPhase === "select" && (
+              <>
+                <div>
+                  <label className="block text-sm text-slate-600 mb-1.5">Amount</label>
+                  <div className="flex gap-2 mb-2">
+                    {["25", "50", "100", "250", "500"].map((a) => (
+                      <button
+                        key={a}
+                        onClick={() => setGiveAmount(a)}
+                        className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          giveAmount === a
+                            ? "bg-emerald-600 text-white"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        ${a}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                    <input
+                      type="text"
+                      value={giveAmount}
+                      onChange={(e) => setGiveAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                      className="w-full pl-7 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-600 mb-1.5">Payment Method</label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {paymentMethods.map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => setPaymentMethod(m)}
+                        className={`py-2 rounded-lg text-xs font-medium transition-colors ${
+                          paymentMethod === m
+                            ? "bg-emerald-600 text-white"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleContinue}
+                  disabled={parsedAmount <= 0}
+                  className="w-full py-3 rounded-xl font-medium text-base bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                >
+                  {isStripeMethod ? `Pay $${giveAmount || "0"}` : `Continue with ${paymentMethod}`}
+                </button>
+
+                <div className="text-xs text-slate-400 space-y-1">
+                  {paymentMethod === "Card" && <p>Processing fee: 2.2% + $0.30</p>}
+                  {paymentMethod === "ACH" && <p>Processing fee: 0.8% (capped at $5)</p>}
+                  {paymentMethod === "DAF" && <p>Flat fee: $5 per grant recommendation</p>}
+                  {paymentMethod === "Stock" && <p>Flat fee: $25 per transfer</p>}
+                  {paymentMethod === "Crypto" && <p>Processing fee: 1.5%</p>}
+                  {paymentMethod === "QCD" && <p>No processing fee</p>}
+                  <p>Tax receipt issued automatically via email.</p>
+                  {org.ein && <p>EIN: {org.ein}</p>}
+                </div>
+              </>
+            )}
           </div>
         </aside>
       </div>
