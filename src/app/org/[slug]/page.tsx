@@ -133,7 +133,7 @@ export default function PublicOrgPage({ params }: { params: Promise<{ slug: stri
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
                 { label: "Annual Revenue", value: fmt(fin.totalRevenue ?? fin.annualBudget ?? 0) },
-                { label: "Programs Funded", value: String(org.programIds?.length ?? 0) },
+                { label: "Programs Funded", value: String(programsList.length || org.programIds?.length || 0) },
                 { label: "Net Assets", value: fmt(fin.netAssets ?? 0) },
                 { label: "Runway", value: `${fin.monthsOfRunway ?? 0} months` },
               ].map((s) => (
