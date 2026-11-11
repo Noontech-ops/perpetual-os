@@ -20,7 +20,8 @@ function camelizeKeys(obj: unknown): unknown {
   return obj;
 }
 
-const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'proxy-injected';
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T | null> {
   try {

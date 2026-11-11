@@ -273,8 +273,8 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
             <div className="space-y-8">
               <div className="grid md:grid-cols-3 gap-4">
                 {[
-                  { label: "Total Revenue", value: fmt(annualRevenue) },
-                  { label: "Total Expenses", value: fmt(totalExpenses) },
+                  { label: "Annual Revenue", value: fmt(annualRevenue) },
+                  { label: "Annual Expenses", value: fmt(totalExpenses) },
                   { label: "Program Expense Ratio", value: `${programExpenseRatio}%` },
                 ].map((s) => (
                   <div key={s.label} className="bg-slate-50 rounded-lg p-4">

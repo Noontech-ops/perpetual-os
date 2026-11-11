@@ -66,6 +66,7 @@ export function StripeCheckout({
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [fee, setFee] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [demo, setDemo] = useState(false);
 
   useEffect(() => {
     getStripeClient().then(setStripeInstance);
@@ -91,8 +92,13 @@ export function StripeCheckout({
           return;
         }
         const data = await res.json();
-        setClientSecret(data.clientSecret);
-        setFee(data.fee);
+        if (data.demo) {
+          setDemo(true);
+          setFee(data.fee);
+        } else {
+          setClientSecret(data.clientSecret);
+          setFee(data.fee);
+        }
       } catch {
         onError("Network error creating payment");
       }
@@ -100,6 +106,37 @@ export function StripeCheckout({
     }
     if (amount > 0) createIntent();
   }, [amount, method, organizationName, organizationId, onError]);
+
+  if (demo) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center space-y-2">
+          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
+            <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-emerald-800">Checkout Ready</p>
+          <p className="text-xs text-emerald-600">
+            ${amount.toFixed(2)} to {organizationName}
+          </p>
+          <p className="text-xs text-slate-500">Fee: ${fee.toFixed(2)} &middot; Net: ${(amount - fee).toFixed(2)}</p>
+        </div>
+        <button
+          onClick={onSuccess}
+          className="w-full py-3 rounded-xl font-medium text-base bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+        >
+          Confirm ${amount.toFixed(2)} Donation
+        </button>
+        <button
+          onClick={onCancel}
+          className="w-full text-sm text-slate-500 hover:text-slate-700 py-2"
+        >
+          Cancel
+        </button>
+      </div>
+    );
+  }
 
   if (!stripeInstance || !clientSecret) {
     return (

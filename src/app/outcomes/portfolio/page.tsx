@@ -55,7 +55,8 @@ export default function PortfolioPage() {
     load();
   }, []);
 
-  const hasRealData = transactions.length > 0;
+  const txOrgIds = [...new Set(transactions.map(t => t.organizationId))];
+  const hasRealData = transactions.length > 0 && txOrgIds.some(id => orgNames.has(id));
 
   const holdings = hasRealData
     ? buildHoldings(transactions, orgNames)
@@ -106,8 +107,8 @@ export default function PortfolioPage() {
             {[
               { label: "Total Given", value: fmt(totalGiven) },
               { label: "Organizations", value: String(holdings.length) },
-              { label: "Transactions", value: String(transactions.length || holdings.length) },
-              { label: "Avg Gift", value: transactions.length > 0 ? fmt(totalGiven / transactions.length) : fmt(totalGiven / holdings.length) },
+              { label: "Transactions", value: String(hasRealData ? transactions.length : holdings.length) },
+              { label: "Avg Gift", value: fmt(totalGiven / (hasRealData ? transactions.length : holdings.length)) },
             ].map((s) => (
               <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-5">
                 <p className="text-sm text-slate-500">{s.label}</p>

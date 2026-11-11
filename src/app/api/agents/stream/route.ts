@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
 Organization: ${mock.organization.name}
 Mission: ${mock.organization.mission}
 Annual Budget: $${mock.organization.financials.annualBudget.toLocaleString()}
-Total Revenue: $${mock.organization.financials.totalRevenue.toLocaleString()}
-Total Expenses: $${mock.organization.financials.totalExpenses.toLocaleString()}
+Annual Revenue: $${mock.organization.financials.totalRevenue.toLocaleString()}
+Annual Expenses: $${mock.organization.financials.totalExpenses.toLocaleString()}
 Net Assets: $${mock.organization.financials.netAssets.toLocaleString()}
 Cash on Hand: $${mock.organization.financials.cashOnHand.toLocaleString()}
 Months of Runway: ${mock.organization.financials.monthsOfRunway}

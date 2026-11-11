@@ -55,6 +55,8 @@ export default function DashboardPage() {
       setActions(a);
       setConfigs(c);
       setLoading(false);
+    }).catch(() => {
+      setLoading(false);
     });
   }, []);
 

@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getStripe, FEE_RATES } from '@/lib/stripe/server';
+import { FEE_RATES } from '@/lib/stripe/server';
 
 export async function POST(request: Request) {
   try {
-    const stripe = getStripe();
     const body = await request.json();
     const { amount, method, organizationName, designation, email } = body;
 
@@ -13,6 +12,13 @@ export async function POST(request: Request) {
 
     const feeRate = FEE_RATES[method] ?? 0.02;
     const fee = Math.round(amount * feeRate * 100) / 100;
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ demo: true, fee, netToOrg: amount - fee });
+    }
+
+    const { getStripe } = await import('@/lib/stripe/server');
+    const stripe = getStripe();
     const amountCents = Math.round(amount * 100);
 
     const intent = await stripe.paymentIntents.create({
