@@ -6,11 +6,11 @@ import { getGivingTransactions, getDonorProfiles } from "@/lib/data";
 import type { GivingTransaction, DonorProfile } from "@/lib/types";
 
 const fallbackHoldings = [
-  { id: "bay-area-literacy", name: "Bay Area Literacy Coalition", sector: "Education", totalGiven: 5000, allocation: 39.2, outcomeMetric: "847 adults reached reading proficiency", trend: 12, lastGift: "Oct 2026" },
-  { id: "stable-ground-housing", name: "Stable Ground Housing", sector: "Essential Rights", totalGiven: 3000, allocation: 23.5, outcomeMetric: "18.3 avg months housing stability", trend: 8, lastGift: "Sep 2026" },
-  { id: "community-health-partners", name: "Community Health Partners", sector: "Health", totalGiven: 2500, allocation: 19.6, outcomeMetric: "3,214 patients served", trend: 21, lastGift: "Aug 2026" },
-  { id: "pathways-workforce", name: "Pathways Workforce Development", sector: "Community", totalGiven: 1500, allocation: 11.8, outcomeMetric: "412 job placements at 90 days", trend: 15, lastGift: "Oct 2026" },
-  { id: "open-stage-arts", name: "Open Stage Arts Collective", sector: "Art / Culture", totalGiven: 750, allocation: 5.9, outcomeMetric: "11,480 free performance attendees", trend: 34, lastGift: "Jul 2026" },
+  { id: "sf-marin-food-bank", name: "SF-Marin Food Bank", sector: "Human Services", totalGiven: 5000, allocation: 39.2, outcomeMetric: "60M meals distributed annually", trend: 12, lastGift: "Oct 2026" },
+  { id: "habitat-for-humanity-sf", name: "Habitat for Humanity Greater SF", sector: "Housing", totalGiven: 3000, allocation: 23.5, outcomeMetric: "142 families housed since 2019", trend: 8, lastGift: "Sep 2026" },
+  { id: "sf-free-clinic", name: "San Francisco Free Clinic", sector: "Health", totalGiven: 2500, allocation: 19.6, outcomeMetric: "8,400 patients served annually", trend: 21, lastGift: "Aug 2026" },
+  { id: "kqed", name: "KQED", sector: "Education", totalGiven: 1500, allocation: 11.8, outcomeMetric: "2.1M weekly viewers and listeners", trend: 15, lastGift: "Oct 2026" },
+  { id: "sf-symphony", name: "San Francisco Symphony", sector: "Arts / Culture", totalGiven: 750, allocation: 5.9, outcomeMetric: "220 concerts and 75K+ attendees", trend: 34, lastGift: "Jul 2026" },
 ];
 
 const causeColors = ["bg-emerald-500", "bg-blue-500", "bg-amber-500", "bg-purple-500", "bg-rose-400", "bg-teal-500", "bg-indigo-500"];

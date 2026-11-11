@@ -28,9 +28,9 @@ export default function OutcomesLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 transition-colors">
+            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 transition-colors">
               Sign In
-            </button>
+            </Link>
             <Link
               href="/outcomes#explore"
               className="text-sm font-medium bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"

@@ -1252,7 +1252,10 @@ function ProgramsTab({
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Sector</span>
                     <span className="font-medium capitalize">
-                      {program.sector.replace(/_/g, " ")}
+                      {program.sector === "arts_culture" ? "Arts / Culture"
+                        : program.sector === "human_services" ? "Human Services"
+                        : program.sector === "essential_rights" ? "Essential Rights"
+                        : program.sector.replace(/_/g, " ")}
                     </span>
                   </div>
                 </div>

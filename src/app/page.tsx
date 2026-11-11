@@ -19,7 +19,7 @@ export default function Home() {
               For Nonprofits
             </Link>
             <Link
-              href="/os"
+              href="/login"
               className="text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
             >
               Sign In

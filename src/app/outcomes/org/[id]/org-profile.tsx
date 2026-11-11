@@ -362,7 +362,12 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
                   <div key={o.id} className="border border-slate-200 rounded-xl p-5 space-y-4">
                     <div className="flex items-start justify-between">
                       <h4 className="font-semibold text-slate-900">{o.reportingPeriod || "Outcome"}</h4>
-                      {o.sector && <span className="text-xs text-slate-500">{String(o.sector).replace(/_/g, " ")}</span>}
+                      {o.sector && <span className="text-xs text-slate-500">{
+                        o.sector === "arts_culture" ? "Arts / Culture"
+                        : o.sector === "human_services" ? "Human Services"
+                        : o.sector === "essential_rights" ? "Essential Rights"
+                        : String(o.sector).replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+                      }</span>}
                     </div>
                     {o.narrative && <p className="text-sm text-slate-600 leading-relaxed">{o.narrative}</p>}
                     {o.metrics && o.metrics.length > 0 && (
@@ -482,7 +487,7 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
                   setGiveStatus("success");
                   setTimeout(() => setGiveStatus("idle"), 3000);
                 }}
-                onError={() => setGiveStatus("error")}
+                onError={() => { setGiveStatus("error"); }}
                 onCancel={() => setGiveStatus("idle")}
               />
             ) : (

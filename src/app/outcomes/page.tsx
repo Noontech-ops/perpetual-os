@@ -26,7 +26,14 @@ function formatBudget(n: number) {
   return `$${(n / 1_000).toFixed(0)}K`;
 }
 
+const SECTOR_LABELS: Record<string, string> = {
+  arts_culture: "Arts / Culture",
+  human_services: "Human Services",
+  essential_rights: "Essential Rights",
+};
+
 function formatSector(s: string) {
+  if (SECTOR_LABELS[s]) return SECTOR_LABELS[s];
   return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
