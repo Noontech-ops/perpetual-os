@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import * as mock from '@/lib/mock-data';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,14 +12,7 @@ export async function GET(request: NextRequest) {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!url || !key) {
-      if (slug === 'bay-area-literacy-coalition') {
-        return NextResponse.json({
-          ...mock.organization,
-          programs: mock.programs,
-          outcomes: mock.outcomes,
-        });
-      }
-      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
     }
 
     const supabase = await createClient();
@@ -32,13 +24,6 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error || !data) {
-      if (slug === 'bay-area-literacy-coalition') {
-        return NextResponse.json({
-          ...mock.organization,
-          programs: mock.programs,
-          outcomes: mock.outcomes,
-        });
-      }
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 

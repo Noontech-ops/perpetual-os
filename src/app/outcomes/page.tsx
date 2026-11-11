@@ -56,14 +56,21 @@ export default function OutcomesExplorePage() {
     return () => clearTimeout(timer);
   }, [fetchOrgs]);
 
-  const filtered = geo === "All" ? orgs : orgs;
+  const filtered = geo === "All" ? orgs : orgs.filter((o) => {
+    const state = o.address?.state ?? "";
+    const city = o.address?.city ?? "";
+    if (geo === "Local") return city.toLowerCase().includes("san francisco") || state === "CA";
+    if (geo === "Regional") return ["CA", "OR", "WA", "NV", "AZ"].includes(state);
+    if (geo === "National") return !!state;
+    return true;
+  });
 
   return (
     <div>
       {/* Hero */}
       <section className="bg-gradient-to-b from-emerald-50 to-white py-16 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
             Discover nonprofits by{" "}
             <span className="text-emerald-600">what they achieve</span>
           </h1>

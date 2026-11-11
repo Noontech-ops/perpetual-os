@@ -20,6 +20,8 @@ function camelizeKeys(obj: unknown): unknown {
   return obj;
 }
 
+const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T | null> {
   try {
     const res = await fetch(path, init);
@@ -31,72 +33,86 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T | null> 
   }
 }
 
+function mockFallback<T>(mockData: T): T | null {
+  return hasSupabase ? null : mockData;
+}
+
 export async function getOrganization(): Promise<Organization> {
   const data = await apiFetch<Organization>('/api/organizations');
   if (data) return data;
-  return mock.organization;
+  return mockFallback(mock.organization) ?? mock.organization;
 }
 
 export async function getConstituents(type?: string): Promise<Constituent[]> {
   const params = type ? `?type=${type}` : '';
   const data = await apiFetch<Constituent[]>(`/api/constituents${params}`);
   if (data) return data;
-  return type ? mock.constituents.filter(c => c.type === type) : mock.constituents;
+  const fb = mockFallback(mock.constituents);
+  if (!fb) return [];
+  return type ? fb.filter(c => c.type === type) : fb;
 }
 
 export async function getTransactions(direction?: string): Promise<Transaction[]> {
   const params = direction ? `?direction=${direction}` : '';
   const data = await apiFetch<Transaction[]>(`/api/transactions${params}`);
   if (data) return data;
-  return direction ? mock.transactions.filter(t => t.direction === direction) : mock.transactions;
+  const fb = mockFallback(mock.transactions);
+  if (!fb) return [];
+  return direction ? fb.filter(t => t.direction === direction) : fb;
 }
 
 export async function getPrograms(): Promise<Program[]> {
   const data = await apiFetch<Program[]>('/api/programs');
   if (data) return data;
-  return mock.programs;
+  return mockFallback(mock.programs) ?? [];
 }
 
 export async function getOutcomes(): Promise<Outcome[]> {
   const data = await apiFetch<Outcome[]>('/api/outcomes');
   if (data) return data;
-  return mock.outcomes;
+  return mockFallback(mock.outcomes) ?? [];
 }
 
 export async function getGrants(status?: string): Promise<Grant[]> {
   const params = status ? `?status=${status}` : '';
   const data = await apiFetch<Grant[]>(`/api/grants${params}`);
   if (data) return data;
-  return status ? mock.grants.filter(g => g.status === status) : mock.grants;
+  const fb = mockFallback(mock.grants);
+  if (!fb) return [];
+  return status ? fb.filter(g => g.status === status) : fb;
 }
 
 export async function getAgentActions(status?: string): Promise<AgentAction[]> {
   const params = status ? `?status=${status}` : '';
   const data = await apiFetch<AgentAction[]>(`/api/agent-actions${params}`);
   if (data) return data;
-  return status ? mock.agentActions.filter(a => a.status === status) : mock.agentActions;
+  const fb = mockFallback(mock.agentActions);
+  if (!fb) return [];
+  return status ? fb.filter(a => a.status === status) : fb;
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const data = await apiFetch<DashboardStats>('/api/dashboard-stats');
   if (data) return data;
-  return mock.dashboardStats;
+  return mockFallback(mock.dashboardStats) ?? mock.dashboardStats;
 }
 
 export async function getAgentConfigs(): Promise<AgentConfig[]> {
-  return mock.agentConfigs;
+  const data = await apiFetch<AgentConfig[]>('/api/agent-configs');
+  if (data) return data;
+  return mockFallback(mock.agentConfigs) ?? [];
 }
 
 export async function getDonorProfiles(): Promise<DonorProfile[]> {
   const data = await apiFetch<DonorProfile[]>('/api/donor-profiles');
   if (data) return data;
-  return mock.donorProfiles;
+  return mockFallback(mock.donorProfiles) ?? [];
 }
 
 export async function getGivingTransactions(): Promise<GivingTransaction[]> {
   const data = await apiFetch<GivingTransaction[]>('/api/donations');
   if (data) return data;
-  return mock.givingTransactions;
+  return mockFallback(mock.givingTransactions) ?? [];
 }
 
 export async function updateAgentAction(id: string, status: 'approved' | 'rejected'): Promise<boolean> {
@@ -141,6 +157,7 @@ export async function searchOrganizations(q?: string, sector?: string): Promise<
   const qs = params.toString();
   const data = await apiFetch<(Organization & { outcomes?: Outcome[] })[]>(`/api/search${qs ? `?${qs}` : ''}`);
   if (data && data.length > 0) return data;
+  if (hasSupabase) return [];
   const orgs = [mock.organization].filter(o => {
     if (sector && o.sector !== sector) return false;
     if (q && !o.name.toLowerCase().includes(q.toLowerCase()) && !o.mission.toLowerCase().includes(q.toLowerCase())) return false;

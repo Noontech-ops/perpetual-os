@@ -16,6 +16,18 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
+    const ids = request.nextUrl.searchParams.get('ids');
+
+    if (ids) {
+      const idList = ids.split(',').filter(Boolean);
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, sector')
+        .in('id', idList);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(data ?? []);
+    }
+
     if (id) {
       const { data, error } = await supabase
         .from('organizations')
@@ -38,7 +50,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('sector', sector);
     }
 
-    const { data, error } = await query.limit(20);
+    const { data, error } = await query.limit(100);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     const orgIds = (data ?? []).map((o: { id: string }) => o.id);

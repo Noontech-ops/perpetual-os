@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createDonation } from "@/lib/data";
-import type { Organization } from "@/lib/types";
+import { StripeCheckout } from "@/components/stripe-checkout";
+import type { Organization, Program, Outcome } from "@/lib/types";
+
+interface OrgWithDetails extends Organization {
+  programs?: Program[];
+  outcomes?: Outcome[];
+}
 
 const tabs = ["Overview", "Financials", "Programs", "Outcomes", "Leadership"] as const;
 type Tab = (typeof tabs)[number];
@@ -39,18 +45,27 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
   const [tab, setTab] = useState<Tab>("Overview");
   const [giveAmount, setGiveAmount] = useState("100");
   const [paymentMethod, setPaymentMethod] = useState<string>("Card");
-  const [giveStatus, setGiveStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [giveStatus, setGiveStatus] = useState<"idle" | "loading" | "success" | "error" | "checkout">("idle");
 
-  const [org, setOrg] = useState<Organization | null>(null);
+  const [org, setOrg] = useState<OrgWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
+        // Try public API first (returns programs + outcomes)
+        const pubRes = await fetch(`/api/organizations/public?slug=${encodeURIComponent(orgId)}`);
+        if (pubRes.ok) {
+          const raw = await pubRes.json();
+          setOrg(camelizeKeys(raw) as OrgWithDetails);
+          setLoading(false);
+          return;
+        }
+        // Fallback to search API (by id)
         const res = await fetch(`/api/search?id=${encodeURIComponent(orgId)}`);
         if (res.ok) {
           const raw = await res.json();
-          setOrg(camelizeKeys(raw) as Organization);
+          setOrg(camelizeKeys(raw) as OrgWithDetails);
         }
       } catch {}
       setLoading(false);
@@ -61,11 +76,16 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
   async function handleGive() {
     const amount = parseFloat(giveAmount);
     if (!amount || amount <= 0 || !org) return;
+    const method = methodApiKeys[paymentMethod] || "card";
+    if (method === "card" || method === "ach") {
+      setGiveStatus("checkout");
+      return;
+    }
     setGiveStatus("loading");
     const result = await createDonation({
       organization_id: org.id,
       amount,
-      method: methodApiKeys[paymentMethod] || "card",
+      method,
       designation: "general",
     });
     setGiveStatus(result ? "success" : "error");
@@ -305,12 +325,30 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
 
           {tab === "Programs" && (
             <div className="space-y-6">
-              <p className="text-sm text-slate-500">
-                Program data is loaded from the organization&apos;s Perpetual OS dashboard when available.
-              </p>
-              <div className="text-center py-12 text-slate-400">
-                <p>Connect to this organization&apos;s Perpetual OS dashboard to view live program data.</p>
-              </div>
+              {org.programs && org.programs.length > 0 ? (
+                org.programs.map((p) => (
+                  <div key={p.id} className="border border-slate-200 rounded-xl p-5 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-semibold text-slate-900">{p.name}</h4>
+                      {p.status && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          p.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
+                        }`}>
+                          {p.status}
+                        </span>
+                      )}
+                    </div>
+                    {p.description && <p className="text-sm text-slate-600 leading-relaxed">{p.description}</p>}
+                    {p.annualBudget > 0 && (
+                      <p className="text-sm text-slate-500">Budget: {fmt(p.annualBudget)}</p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-slate-400">
+                  <p>No program data available yet.</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -319,9 +357,45 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
               <p className="text-sm text-slate-600">
                 Structured outcome data captured at the point of service. Each metric includes methodology so funders and donors can compare apples to apples.
               </p>
-              <div className="text-center py-12 text-slate-400">
-                <p>Connect to this organization&apos;s Perpetual OS dashboard to view live outcomes data.</p>
-              </div>
+              {org.outcomes && org.outcomes.length > 0 ? (
+                org.outcomes.map((o) => (
+                  <div key={o.id} className="border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-semibold text-slate-900">{o.reportingPeriod || "Outcome"}</h4>
+                      {o.sector && <span className="text-xs text-slate-500">{String(o.sector).replace(/_/g, " ")}</span>}
+                    </div>
+                    {o.narrative && <p className="text-sm text-slate-600 leading-relaxed">{o.narrative}</p>}
+                    {o.metrics && o.metrics.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {o.metrics.map((m, i) => (
+                          <div key={i} className="bg-emerald-50 rounded-lg p-3">
+                            <p className="text-xl font-bold text-emerald-700">
+                              {typeof m.value === "number" ? m.value.toLocaleString() : m.value}
+                              {m.unit && <span className="text-sm font-normal text-emerald-600 ml-1">{m.unit}</span>}
+                            </p>
+                            <p className="text-xs text-emerald-600 mt-0.5">{m.label}</p>
+                            {m.target > 0 && (
+                              <div className="mt-2">
+                                <div className="flex justify-between text-xs text-emerald-500 mb-0.5">
+                                  <span>Progress</span>
+                                  <span>{Math.round((m.value / m.target) * 100)}%</span>
+                                </div>
+                                <div className="w-full bg-emerald-100 rounded-full h-1.5">
+                                  <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${Math.min(100, (m.value / m.target) * 100)}%` }} />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-slate-400">
+                  <p>No outcome data available yet.</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -398,33 +472,50 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
               </div>
             </div>
 
-            <button
-              onClick={handleGive}
-              disabled={giveStatus === "loading" || giveStatus === "success"}
-              className={`w-full py-3 rounded-xl font-medium text-base transition-colors ${
-                giveStatus === "success"
-                  ? "bg-green-600 text-white"
-                  : giveStatus === "error"
-                    ? "bg-red-600 text-white hover:bg-red-700"
-                    : "bg-emerald-600 text-white hover:bg-emerald-700"
-              } disabled:opacity-70`}
-            >
-              {giveStatus === "loading" && "Processing..."}
-              {giveStatus === "success" && "Donation Recorded!"}
-              {giveStatus === "error" && "Failed — Try Again"}
-              {giveStatus === "idle" && `Give $${giveAmount || "0"}`}
-            </button>
+            {giveStatus === "checkout" ? (
+              <StripeCheckout
+                amount={parseFloat(giveAmount) || 0}
+                method={methodApiKeys[paymentMethod] || "card"}
+                organizationId={org.id}
+                organizationName={org.name}
+                onSuccess={() => {
+                  setGiveStatus("success");
+                  setTimeout(() => setGiveStatus("idle"), 3000);
+                }}
+                onError={() => setGiveStatus("error")}
+                onCancel={() => setGiveStatus("idle")}
+              />
+            ) : (
+              <>
+                <button
+                  onClick={handleGive}
+                  disabled={giveStatus === "loading" || giveStatus === "success"}
+                  className={`w-full py-3 rounded-xl font-medium text-base transition-colors ${
+                    giveStatus === "success"
+                      ? "bg-green-600 text-white"
+                      : giveStatus === "error"
+                        ? "bg-red-600 text-white hover:bg-red-700"
+                        : "bg-emerald-600 text-white hover:bg-emerald-700"
+                  } disabled:opacity-70`}
+                >
+                  {giveStatus === "loading" && "Processing..."}
+                  {giveStatus === "success" && "Donation Recorded!"}
+                  {giveStatus === "error" && "Failed — Try Again"}
+                  {giveStatus === "idle" && `Give $${giveAmount || "0"}`}
+                </button>
 
-            <div className="text-xs text-slate-400 space-y-1">
-              {paymentMethod === "Card" && <p>Processing fee: 2.2% + $0.30</p>}
-              {paymentMethod === "ACH" && <p>Processing fee: 0.8% (capped at $5)</p>}
-              {paymentMethod === "DAF" && <p>Flat fee: $5 per grant recommendation</p>}
-              {paymentMethod === "Stock" && <p>Flat fee: $25 per transfer</p>}
-              {paymentMethod === "Crypto" && <p>Processing fee: 1.5%</p>}
-              {paymentMethod === "QCD" && <p>No processing fee</p>}
-              <p>Tax receipt issued automatically via email.</p>
-              {org.ein && <p>EIN: {org.ein}</p>}
-            </div>
+                <div className="text-xs text-slate-400 space-y-1">
+                  {paymentMethod === "Card" && <p>Processing fee: 2.2% + $0.30</p>}
+                  {paymentMethod === "ACH" && <p>Processing fee: 0.8% (capped at $5)</p>}
+                  {paymentMethod === "DAF" && <p>Flat fee: $5 per grant recommendation</p>}
+                  {paymentMethod === "Stock" && <p>Flat fee: $25 per transfer</p>}
+                  {paymentMethod === "Crypto" && <p>Processing fee: 1.5%</p>}
+                  {paymentMethod === "QCD" && <p>No processing fee</p>}
+                  <p>Tax receipt issued automatically via email.</p>
+                  {org.ein && <p>EIN: {org.ein}</p>}
+                </div>
+              </>
+            )}
           </div>
         </aside>
       </div>

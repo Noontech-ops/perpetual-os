@@ -27,20 +27,38 @@ function formatMonth(dateStr: string) {
 export default function PortfolioPage() {
   const [transactions, setTransactions] = useState<GivingTransaction[]>([]);
   const [profile, setProfile] = useState<DonorProfile | null>(null);
+  const [orgNames, setOrgNames] = useState<Map<string, { name: string; sector: string }>>(new Map());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getGivingTransactions(), getDonorProfiles()]).then(([txs, profiles]) => {
+    async function load() {
+      const [txs, profiles] = await Promise.all([getGivingTransactions(), getDonorProfiles()]);
       setTransactions(txs);
       setProfile(profiles[0] ?? null);
+
+      if (txs.length > 0) {
+        const orgIds = [...new Set(txs.map((t) => t.organizationId))];
+        try {
+          const res = await fetch(`/api/search?ids=${orgIds.join(",")}`);
+          if (res.ok) {
+            const orgs = await res.json();
+            const nameMap = new Map<string, { name: string; sector: string }>();
+            for (const o of Array.isArray(orgs) ? orgs : [orgs]) {
+              nameMap.set(o.id, { name: o.name, sector: o.sector || "General" });
+            }
+            setOrgNames(nameMap);
+          }
+        } catch {}
+      }
       setLoading(false);
-    });
+    }
+    load();
   }, []);
 
   const hasRealData = transactions.length > 0;
 
   const holdings = hasRealData
-    ? buildHoldings(transactions)
+    ? buildHoldings(transactions, orgNames)
     : fallbackHoldings;
 
   const totalGiven = holdings.reduce((s, h) => s + h.totalGiven, 0);
@@ -186,7 +204,7 @@ export default function PortfolioPage() {
   );
 }
 
-function buildHoldings(txs: GivingTransaction[]) {
+function buildHoldings(txs: GivingTransaction[], nameMap: Map<string, { name: string; sector: string }>) {
   const byOrg = new Map<string, { totalGiven: number; lastDate: string; count: number }>();
   for (const tx of txs) {
     const orgId = tx.organizationId;
@@ -200,16 +218,19 @@ function buildHoldings(txs: GivingTransaction[]) {
     }
   }
   const total = Array.from(byOrg.values()).reduce((s, v) => s + v.totalGiven, 0);
-  return Array.from(byOrg.entries()).map(([orgId, data]) => ({
-    id: orgId,
-    name: orgId,
-    sector: "General",
-    totalGiven: data.totalGiven,
-    allocation: total > 0 ? Math.round((data.totalGiven / total) * 1000) / 10 : 0,
-    outcomeMetric: `${data.count} contribution${data.count > 1 ? 's' : ''}`,
-    trend: 0,
-    lastGift: formatMonth(data.lastDate),
-  }));
+  return Array.from(byOrg.entries()).map(([orgId, data]) => {
+    const info = nameMap.get(orgId);
+    return {
+      id: orgId,
+      name: info?.name ?? orgId.slice(0, 8),
+      sector: info?.sector ?? "General",
+      totalGiven: data.totalGiven,
+      allocation: total > 0 ? Math.round((data.totalGiven / total) * 1000) / 10 : 0,
+      outcomeMetric: `${data.count} contribution${data.count > 1 ? 's' : ''}`,
+      trend: 0,
+      lastGift: formatMonth(data.lastDate),
+    };
+  });
 }
 
 function buildMonthlyGiving(txs: GivingTransaction[]) {

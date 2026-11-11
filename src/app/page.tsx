@@ -30,7 +30,7 @@ export default function Home() {
 
       <main className="flex-1 flex flex-col items-center justify-center px-6">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-5xl sm:text-6xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight">
             The operating system for{" "}
             <span className="text-brand-600">perpetual</span> impact
           </h1>
