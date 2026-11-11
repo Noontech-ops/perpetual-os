@@ -185,7 +185,7 @@ export default function OutcomesExplorePage() {
               const budget = org.financials?.annualBudget ?? 0;
               const location = getLocation(org.address);
               const allMetrics = org.outcomes?.flatMap(o => o.metrics ?? []) ?? [];
-              const leadMetric = allMetrics.find(m => !/revenue|budget|expense/i.test(m.label)) ?? allMetrics[0];
+              const leadMetric = allMetrics.find(m => !/revenue|budget|expense|net assets|assets|liabilities/i.test(m.label)) ?? allMetrics[0];
               const programExpenseRatio = org.financials?.totalExpenses && budget
                 ? Math.round(((org.financials.totalExpenses * 0.82) / budget) * 100)
                 : 80;
@@ -218,7 +218,7 @@ export default function OutcomesExplorePage() {
                           <span className="text-sm font-normal text-emerald-600 ml-1">{leadMetric.unit}</span>
                         </p>
                         <p className="text-xs text-emerald-600 mt-0.5">
-                          {/^total revenue$/i.test(leadMetric.label) ? "Annual Impact Budget" : leadMetric.label}
+                          {/^(total revenue|net assets)$/i.test(leadMetric.label) ? "Annual Impact Budget" : leadMetric.label}
                         </p>
                         {leadMetric.target > 0 && (
                           <p className="text-xs text-emerald-500 mt-1">

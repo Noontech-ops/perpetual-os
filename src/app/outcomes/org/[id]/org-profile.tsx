@@ -379,7 +379,7 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
                               {m.unit && <span className="text-sm font-normal text-emerald-600 ml-1">{m.unit}</span>}
                             </p>
                             <p className="text-xs text-emerald-600 mt-0.5">
-                              {/^total revenue$/i.test(m.label) ? "Annual Impact Budget" : m.label}
+                              {/^(total revenue|net assets)$/i.test(m.label) ? "Annual Impact Budget" : m.label}
                             </p>
                             {m.target > 0 && (
                               <div className="mt-2">
