@@ -35,15 +35,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     import('@/lib/supabase/client').then(async ({ createClient }) => {
       const supabase = createClient();
-      const { data: { user: u } } = await supabase.auth.getUser();
-      setUser(u);
+      try {
+        const { data: { user: u } } = await supabase.auth.getUser();
+        setUser(u);
+      } catch {
+        // Auth service unavailable — continue without user
+      }
       setLoading(false);
 
       const { data } = supabase.auth.onAuthStateChange((_event, session) => {
         setUser(session?.user ?? null);
       });
       subscription = data.subscription;
-    });
+    }).catch(() => { setLoading(false); });
 
     return () => { subscription?.unsubscribe(); };
   }, []);

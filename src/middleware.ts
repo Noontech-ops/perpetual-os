@@ -16,20 +16,24 @@ export async function middleware(request: NextRequest) {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !key || key === 'proxy-injected') return response;
 
-    const { createServerClient } = await import('@supabase/ssr');
-    const supabase = createServerClient(url, key, {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+    try {
+      const { createServerClient } = await import('@supabase/ssr');
+      const supabase = createServerClient(url, key, {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll() {},
         },
-        setAll() {},
-      },
-    });
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
+      });
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!user && !error) {
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+    } catch {
+      // Auth check failed — let the page load rather than redirect-loop
     }
   }
 

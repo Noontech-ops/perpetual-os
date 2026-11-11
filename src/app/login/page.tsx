@@ -18,14 +18,24 @@ function LoginForm() {
     setError('');
 
     const { createClient } = await import('@/lib/supabase/client');
-    const { error } = await createClient().auth.signInWithPassword({ email, password });
+    const supabase = createClient();
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      window.location.href = redirect;
+    let lastError: string | null = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error) {
+        window.location.href = redirect;
+        return;
+      }
+      lastError = error.message;
+      if (!lastError.includes('database') && !lastError.includes('schema') && !lastError.includes('timeout')) {
+        break;
+      }
+      if (attempt < 2) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
     }
+
+    setError(lastError ?? 'Login failed');
+    setLoading(false);
   }
 
   return (
