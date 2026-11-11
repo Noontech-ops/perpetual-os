@@ -156,12 +156,6 @@ export async function searchOrganizations(q?: string, sector?: string): Promise<
   if (sector) params.set('sector', sector);
   const qs = params.toString();
   const data = await apiFetch<(Organization & { outcomes?: Outcome[] })[]>(`/api/search${qs ? `?${qs}` : ''}`);
-  if (data && data.length > 0) return data;
-  if (hasSupabase) return [];
-  const orgs = [mock.organization].filter(o => {
-    if (sector && o.sector !== sector) return false;
-    if (q && !o.name.toLowerCase().includes(q.toLowerCase()) && !o.mission.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  });
-  return orgs.map(o => ({ ...o, outcomes: mock.outcomes.filter(out => o.programIds?.includes(out.programId)) }));
+  if (data && Array.isArray(data) && data.length > 0) return data;
+  return [];
 }

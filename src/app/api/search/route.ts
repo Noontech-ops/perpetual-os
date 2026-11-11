@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { marketplaceOrgs } from '@/lib/mock-marketplace';
+
+function fallbackSearch(q: string, sector: string | null) {
+  let results = marketplaceOrgs;
+  if (sector) results = results.filter(o => o.sector === sector);
+  if (q) {
+    const lower = q.toLowerCase();
+    results = results.filter(o =>
+      o.name.toLowerCase().includes(lower) || o.mission.toLowerCase().includes(lower));
+  }
+  return results;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,10 +23,15 @@ export async function GET(request: NextRequest) {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!url || !key) {
-      return NextResponse.json([]);
+      return NextResponse.json(fallbackSearch(q, sector));
     }
 
-    const supabase = await createClient();
+    let supabase;
+    try {
+      supabase = await createClient();
+    } catch {
+      return NextResponse.json(fallbackSearch(q, sector));
+    }
 
     const ids = request.nextUrl.searchParams.get('ids');
 
@@ -24,7 +41,10 @@ export async function GET(request: NextRequest) {
         .from('organizations')
         .select('id, name, sector')
         .in('id', idList);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) {
+        const fb = marketplaceOrgs.filter(o => idList.includes(o.id));
+        return NextResponse.json(fb.length > 0 ? fb : []);
+      }
       return NextResponse.json(data ?? []);
     }
 
@@ -34,7 +54,11 @@ export async function GET(request: NextRequest) {
         .select('id, name, legal_name, ein, mission, vision, sector, founded, website, address, phone, email, leadership, financials, public_profile')
         .eq('id', id)
         .single();
-      if (error) return NextResponse.json({ error: error.message }, { status: 404 });
+      if (error) {
+        const fb = marketplaceOrgs.find(o => o.id === id);
+        if (fb) return NextResponse.json(fb);
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
       return NextResponse.json(data);
     }
 
@@ -51,9 +75,17 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query.limit(100);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const orgIds = (data ?? []).map((o: { id: string }) => o.id);
+    if (error || !data || data.length === 0) {
+      if (error) return NextResponse.json(fallbackSearch(q, sector));
+      if (!data || data.length === 0) {
+        const fb = fallbackSearch(q, sector);
+        if (fb.length > 0) return NextResponse.json(fb);
+      }
+      return NextResponse.json([]);
+    }
+
+    const orgIds = data.map((o: { id: string }) => o.id);
     const outcomesMap: Record<string, unknown[]> = {};
     if (orgIds.length > 0) {
       const { data: outData } = await supabase
@@ -69,13 +101,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const enriched = (data ?? []).map((org: { id: string }) => ({
+    const enriched = data.map((org: { id: string }) => ({
       ...org,
       outcomes: outcomesMap[org.id] ?? [],
     }));
     return NextResponse.json(enriched);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Search failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json(fallbackSearch(
+      request.nextUrl.searchParams.get('q') || '',
+      request.nextUrl.searchParams.get('sector'),
+    ));
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { marketplaceOrgs } from '@/lib/mock-marketplace';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +13,9 @@ export async function GET(request: NextRequest) {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!url || !key) {
-      return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+      const fb = marketplaceOrgs.find(o => o.id === slug || o.slug === slug);
+      if (fb) return NextResponse.json(fb);
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
     const supabase = await createClient();
@@ -24,6 +27,8 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error || !data) {
+      const fb = marketplaceOrgs.find(o => o.id === slug || o.slug === slug);
+      if (fb) return NextResponse.json(fb);
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
@@ -35,6 +40,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ ...data, programs: programs ?? [], outcomes: outcomes ?? [] });
   } catch (error) {
+    const slug = request.nextUrl.searchParams.get('slug');
+    const fb = marketplaceOrgs.find(o => o.id === slug || o.slug === slug);
+    if (fb) return NextResponse.json(fb);
     const message = error instanceof Error ? error.message : 'Failed to fetch organization';
     return NextResponse.json({ error: message }, { status: 500 });
   }
