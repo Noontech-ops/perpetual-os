@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    if (!url || !key) {
+    if (!url || !key || key === 'proxy-injected') {
       const fb = marketplaceOrgs.find(o => o.id === slug || o.slug === slug);
       if (fb) return NextResponse.json(fb);
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });

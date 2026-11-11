@@ -6,11 +6,11 @@ import { getGivingTransactions, getDonorProfiles } from "@/lib/data";
 import type { GivingTransaction, DonorProfile } from "@/lib/types";
 
 const fallbackHoldings = [
-  { id: "sf-marin-food-bank", name: "SF-Marin Food Bank", sector: "Human Services", totalGiven: 5000, allocation: 39.2, outcomeMetric: "60M meals distributed annually", trend: 12, lastGift: "Oct 2026" },
-  { id: "habitat-for-humanity-sf", name: "Habitat for Humanity Greater SF", sector: "Housing", totalGiven: 3000, allocation: 23.5, outcomeMetric: "142 families housed since 2019", trend: 8, lastGift: "Sep 2026" },
-  { id: "sf-free-clinic", name: "San Francisco Free Clinic", sector: "Health", totalGiven: 2500, allocation: 19.6, outcomeMetric: "8,400 patients served annually", trend: 21, lastGift: "Aug 2026" },
-  { id: "kqed", name: "KQED", sector: "Education", totalGiven: 1500, allocation: 11.8, outcomeMetric: "2.1M weekly viewers and listeners", trend: 15, lastGift: "Oct 2026" },
-  { id: "sf-symphony", name: "San Francisco Symphony", sector: "Arts / Culture", totalGiven: 750, allocation: 5.9, outcomeMetric: "220 concerts and 75K+ attendees", trend: 34, lastGift: "Jul 2026" },
+  { id: "sf-symphony", name: "San Francisco Symphony", sector: "Arts / Culture", totalGiven: 5000, allocation: 39.2, outcomeMetric: "220 concerts and 75K+ attendees annually", trend: 34, lastGift: "Oct 2026" },
+  { id: "kqed", name: "KQED", sector: "Education", totalGiven: 3000, allocation: 23.5, outcomeMetric: "2.1M weekly viewers and listeners", trend: 15, lastGift: "Sep 2026" },
+  { id: "wikimedia-foundation", name: "Wikimedia Foundation", sector: "Education", totalGiven: 2500, allocation: 19.6, outcomeMetric: "6.7B monthly pageviews across 300+ languages", trend: 8, lastGift: "Aug 2026" },
+  { id: "sf-aids-foundation", name: "San Francisco AIDS Foundation", sector: "Health", totalGiven: 1500, allocation: 11.8, outcomeMetric: "18,000+ clients served annually", trend: 21, lastGift: "Oct 2026" },
+  { id: "sfjazz", name: "SFJAZZ", sector: "Arts / Culture", totalGiven: 750, allocation: 5.9, outcomeMetric: "450+ performances and 200K+ attendees", trend: 28, lastGift: "Jul 2026" },
 ];
 
 const causeColors = ["bg-emerald-500", "bg-blue-500", "bg-amber-500", "bg-purple-500", "bg-rose-400", "bg-teal-500", "bg-indigo-500"];

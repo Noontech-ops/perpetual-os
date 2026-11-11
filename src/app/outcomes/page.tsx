@@ -244,13 +244,13 @@ export default function OutcomesExplorePage() {
                   {/* Actions */}
                   <div className="px-5 py-3 border-t border-slate-100 flex items-center gap-3">
                     <Link
-                      href={org.slug ? `/org/${org.slug}` : `/outcomes/org/${org.id}`}
+                      href={`/outcomes/org/${org.slug || org.id}`}
                       className="flex-1 text-center text-sm font-medium text-slate-700 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
                     >
                       View Profile
                     </Link>
                     <Link
-                      href={org.slug ? `/org/${org.slug}#give` : `/outcomes/org/${org.id}#give`}
+                      href={`/outcomes/org/${org.slug || org.id}#give`}
                       className="flex-1 text-center text-sm font-medium text-white py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition-colors"
                     >
                       Give
