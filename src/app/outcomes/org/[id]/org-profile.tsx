@@ -378,7 +378,9 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
                               {typeof m.value === "number" ? m.value.toLocaleString() : m.value}
                               {m.unit && <span className="text-sm font-normal text-emerald-600 ml-1">{m.unit}</span>}
                             </p>
-                            <p className="text-xs text-emerald-600 mt-0.5">{m.label}</p>
+                            <p className="text-xs text-emerald-600 mt-0.5">
+                              {/^total revenue$/i.test(m.label) ? "Annual Impact Budget" : m.label}
+                            </p>
                             {m.target > 0 && (
                               <div className="mt-2">
                                 <div className="flex justify-between text-xs text-emerald-500 mb-0.5">
