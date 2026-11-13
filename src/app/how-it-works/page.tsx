@@ -305,7 +305,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* FAQ */}
-        <section className="py-20 px-6">
+        <section id="faq" className="py-20 px-6">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-3xl font-bold text-slate-900">Frequently Asked Questions</h2>

@@ -197,15 +197,14 @@ export default function Home() {
               <h4 className="text-sm font-semibold text-white mb-3">Resources</h4>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API</a></li>
+                <li><Link href="/how-it-works#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/how-it-works#faq" className="hover:text-white transition-colors">FAQ</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white mb-3">Company</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><Link href="/onboarding" className="hover:text-white transition-colors">Get Started</Link></li>
                 <li><span className="text-slate-400">perpetualoutcomes.com</span></li>
               </ul>
             </div>
