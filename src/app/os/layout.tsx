@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ReactNode, useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { AgentChat } from "@/components/agent-chat";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import type { AgentType } from "@/lib/types";
 
 const navItems = [
@@ -180,10 +181,11 @@ export default function OSLayout({ children }: { children: ReactNode }) {
             </button>
             <h1 className="text-lg font-semibold text-slate-900">{headerTitle}</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/outcomes" className="text-sm text-slate-500 hover:text-brand-600">
+          <div className="flex items-center gap-2">
+            <Link href="/outcomes" className="text-sm text-slate-500 hover:text-brand-600 hidden sm:inline">
               View public page &#8599;
             </Link>
+            <NotificationsDropdown />
             <Link
               href="/os/settings"
               className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 text-sm font-medium hover:bg-brand-200 transition-colors"
