@@ -4,8 +4,8 @@ export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white px-6">
       <div className="text-center max-w-md">
-        <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-6">
-          <span className="text-emerald-600 text-2xl font-bold">404</span>
+        <div className="w-16 h-16 rounded-2xl bg-brand-100 flex items-center justify-center mx-auto mb-6">
+          <span className="text-brand-600 text-2xl font-bold">404</span>
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Page not found</h1>
         <p className="text-slate-500 mb-8">
@@ -14,7 +14,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/outcomes"
-            className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+            className="px-6 py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 transition-colors"
           >
             Explore Nonprofits
           </Link>

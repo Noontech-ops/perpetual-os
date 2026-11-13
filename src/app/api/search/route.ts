@@ -23,6 +23,16 @@ export async function GET(request: NextRequest) {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!url || !key || key === 'proxy-injected') {
+      const ids = request.nextUrl.searchParams.get('ids');
+      if (ids) {
+        const idList = ids.split(',').filter(Boolean);
+        const fb = marketplaceOrgs.filter(o => idList.includes(o.id));
+        return NextResponse.json(fb);
+      }
+      if (id) {
+        const fb = marketplaceOrgs.find(o => o.id === id);
+        return NextResponse.json(fb ?? { error: 'Not found' }, fb ? {} : { status: 404 });
+      }
       return NextResponse.json(fallbackSearch(q, sector));
     }
 
