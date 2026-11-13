@@ -18,6 +18,9 @@ export default function Home() {
             <Link href="/os" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
               For Nonprofits
             </Link>
+            <Link href="/how-it-works" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
+              How It Works
+            </Link>
             <Link
               href="/outcomes"
               className="text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"

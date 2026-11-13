@@ -19,10 +19,10 @@ export default function NotFound() {
             Explore Nonprofits
           </Link>
           <Link
-            href="/dashboard"
+            href="/os"
             className="px-6 py-2.5 border border-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
           >
-            Go to Dashboard
+            Nonprofit OS
           </Link>
         </div>
       </div>

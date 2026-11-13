@@ -1489,3 +1489,600 @@ function OutcomesTab({
   );
 }
 
+/* ──────────────────────────── Compliance Tab ──────────────────────────── */
+
+function ComplianceTab({ grants }: { grants: Grant[] }) {
+  const filings = [
+    { name: "IRS Form 990", due: "2027-05-15", status: "drafting", assignee: "Compliance Agent" },
+    { name: "CA RRF-1 (Registry of Charitable Trusts)", due: "2027-04-15", status: "not started", assignee: "Compliance Agent" },
+    { name: "CA Form 199", due: "2027-05-15", status: "not started", assignee: "Compliance Agent" },
+    { name: "Q4 Payroll Tax (941)", due: "2027-01-31", status: "filed", assignee: "Finance Agent" },
+    { name: "1099-NEC (Contractors)", due: "2027-01-31", status: "complete", assignee: "Finance Agent" },
+    { name: "Workers' Comp Audit", due: "2027-03-01", status: "not started", assignee: "ED" },
+  ];
+
+  const stateRegistrations = [
+    { state: "California", status: "active", renewal: "2027-01-15", regNumber: "CT-123456" },
+    { state: "New York", status: "active", renewal: "2027-07-31", regNumber: "41-22-33" },
+    { state: "Illinois", status: "active", renewal: "2027-06-30", regNumber: "CO-00234" },
+    { state: "Texas", status: "active", renewal: "2027-08-31", regNumber: "TX-NP-1892" },
+    { state: "Massachusetts", status: "expired", renewal: "2026-09-30", regNumber: "PC-054321" },
+    { state: "Oregon", status: "active", renewal: "2027-10-15", regNumber: "PB-7788" },
+    { state: "Washington", status: "pending", renewal: "—", regNumber: "Pending" },
+    { state: "Colorado", status: "active", renewal: "2027-05-01", regNumber: "20263014891" },
+    { state: "Florida", status: "active", renewal: "2027-03-31", regNumber: "SC-09312" },
+    { state: "Pennsylvania", status: "active", renewal: "2027-09-30", regNumber: "54789" },
+    { state: "Georgia", status: "active", renewal: "2027-09-15", regNumber: "C-100233" },
+    { state: "Virginia", status: "active", renewal: "2027-11-30", regNumber: "01-1234" },
+    { state: "Minnesota", status: "expired", renewal: "2026-07-31", regNumber: "MN-30021" },
+    { state: "Connecticut", status: "active", renewal: "2027-09-30", regNumber: "0614" },
+  ];
+
+  const activeCount = stateRegistrations.filter((s) => s.status === "active").length;
+
+  const documents = [
+    { name: "Articles of Incorporation", status: "current", lastUpdated: "2019-03-12" },
+    { name: "Bylaws (Amended)", status: "current", lastUpdated: "2024-01-18" },
+    { name: "IRS Determination Letter", status: "current", lastUpdated: "2019-06-01" },
+    { name: "Conflict of Interest Policy", status: "current", lastUpdated: "2025-01-10" },
+    { name: "Whistleblower Policy", status: "current", lastUpdated: "2023-08-22" },
+    { name: "Document Retention Policy", status: "needs review", lastUpdated: "2021-04-15" },
+    { name: "Gift Acceptance Policy", status: "current", lastUpdated: "2024-06-01" },
+    { name: "D&O Insurance Certificate", status: "current", lastUpdated: "2026-07-01" },
+  ];
+
+  const agentActivity = [
+    { id: "ca-1", action: "Drafted Form 990 Part III (Statement of Program Accomplishments)", status: "ready for review", detail: "Pulled program data, outcomes metrics, and financials. 3 program narratives generated from your outcome ledger." },
+    { id: "ca-2", action: "Flagged expired registration — Massachusetts", status: "action needed", detail: "Registration expired Sep 30. Renewal form pre-filled. Needs ED signature and $150 filing fee." },
+    { id: "ca-3", action: "Reviewed grant restriction compliance", status: "complete", detail: "All 4 active grants within spending parameters. Hellman Foundation grant at 72% spend with 4 months remaining — on track." },
+    { id: "ca-4", action: "Flagged expired registration — Minnesota", status: "action needed", detail: "Registration expired Jul 31. Annual report and $25 fee required. Form pre-filled and ready." },
+    { id: "ca-5", action: "Annual audit prep — compiled document checklist", status: "complete", detail: "FY2026 audit scheduled for February. All 23 supporting documents located and organized. No gaps found." },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Filing Status" value="On Track" />
+        <StatCard label="State Registrations" value={`${activeCount}/${stateRegistrations.length} Active`} />
+        <StatCard label="Audit Status" value="Clean FY2025" />
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle>Compliance Agent Activity</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {agentActivity.map((item) => (
+              <div key={item.id} className="border border-slate-200 rounded-lg p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-slate-900">{item.action}</p>
+                      <Badge variant={item.status === "action needed" ? "danger" : item.status === "ready for review" ? "warning" : "success"}>
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-600">{item.detail}</p>
+                  </div>
+                  {item.status === "action needed" && (
+                    <button className="px-3 py-1.5 text-xs font-medium bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100 shrink-0">Review</button>
+                  )}
+                  {item.status === "ready for review" && (
+                    <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0">Review</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Regulatory Calendar</CardTitle></CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50">
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Filing</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Due Date</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Status</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Assigned To</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filings.map((f, i) => (
+                  <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="py-3 px-4 font-medium text-slate-900">{f.name}</td>
+                    <td className="py-3 px-4 text-slate-600">{formatDate(f.due)}</td>
+                    <td className="py-3 px-4">
+                      <Badge variant={f.status === "complete" || f.status === "filed" ? "success" : f.status === "drafting" ? "info" : "default"}>
+                        {f.status}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">{f.assignee}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>State Registrations</CardTitle></CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50">
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">State</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Registration #</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Status</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Renewal Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stateRegistrations.map((reg, i) => (
+                  <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="py-3 px-4 font-medium text-slate-900">{reg.state}</td>
+                    <td className="py-3 px-4 text-slate-600 font-mono text-xs">{reg.regNumber}</td>
+                    <td className="py-3 px-4">
+                      <Badge variant={reg.status === "active" ? "success" : reg.status === "expired" ? "danger" : "warning"}>
+                        {reg.status}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">{reg.renewal === "—" ? "—" : formatDate(reg.renewal)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Document Vault</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {documents.map((doc, i) => (
+              <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">{doc.name}</p>
+                  <p className="text-xs text-slate-500">Last updated {formatDate(doc.lastUpdated)}</p>
+                </div>
+                <Badge variant={doc.status === "current" ? "success" : "warning"}>
+                  {doc.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/* ──────────────────────────── Marketing Tab ──────────────────────────── */
+
+function MarketingTab() {
+  const campaigns = [
+    { id: "mc-1", name: "Year-End Appeal 2026", status: "active", channel: "Email + Social", startDate: "2026-11-15", endDate: "2026-12-31", raised: 28500, goal: 75000 },
+    { id: "mc-2", name: "Giving Tuesday", status: "complete", channel: "Email + Social + SMS", startDate: "2026-12-03", endDate: "2026-12-03", raised: 12300, goal: 10000 },
+    { id: "mc-3", name: "Spring Newsletter", status: "scheduled", channel: "Email", startDate: "2027-03-01", endDate: "2027-03-01", raised: 0, goal: 0 },
+    { id: "mc-4", name: "Annual Report Launch", status: "drafting", channel: "Email + Web", startDate: "2027-02-15", endDate: "2027-02-28", raised: 0, goal: 0 },
+  ];
+
+  const emailPerformance = [
+    { name: "Year-End Appeal — Wave 1", sent: "2026-11-15", recipients: 3420, openRate: 38.2, clickRate: 8.4, unsubRate: 0.3 },
+    { name: "Giving Tuesday Countdown", sent: "2026-12-01", recipients: 3380, openRate: 42.1, clickRate: 12.7, unsubRate: 0.1 },
+    { name: "Giving Tuesday — Day Of", sent: "2026-12-03", recipients: 3375, openRate: 45.3, clickRate: 15.2, unsubRate: 0.2 },
+    { name: "Impact Update — Q3", sent: "2026-10-15", recipients: 3450, openRate: 31.5, clickRate: 6.8, unsubRate: 0.4 },
+    { name: "Volunteer Appreciation", sent: "2026-09-20", recipients: 1280, openRate: 52.1, clickRate: 9.3, unsubRate: 0.1 },
+  ];
+
+  const contentPipeline = [
+    { title: "Annual Report 2026 — Draft", stage: "draft", type: "Report", assignee: "Marketing Agent" },
+    { title: "Q4 Impact Infographic", stage: "review", type: "Social", assignee: "Marketing Agent" },
+    { title: "Year-End Thank You Video Script", stage: "review", type: "Video", assignee: "ED" },
+    { title: "January Newsletter", stage: "draft", type: "Email", assignee: "Marketing Agent" },
+    { title: "Board Spotlight — Sarah Chen", stage: "scheduled", type: "Blog", assignee: "Marketing Agent" },
+    { title: "Donor Spotlight — Margaret Cho", stage: "published", type: "Blog", assignee: "Marketing Agent" },
+  ];
+
+  const agentDrafts = [
+    { id: "md-1", action: "Drafted Year-End Appeal email sequence (3 emails)", status: "ready for review", detail: "Personalized per donor tier (Major, Mid, Grassroots). Includes impact stats from your outcomes ledger. A/B subject lines generated." },
+    { id: "md-2", action: "Generated social media calendar — December", status: "approved", detail: "15 posts across Instagram, LinkedIn, and Twitter/X. Mix of impact stories, donor appreciation, and year-in-review content." },
+    { id: "md-3", action: "Drafted Annual Report narrative sections", status: "in progress", detail: "Executive summary and 3 program sections complete. Financial summary section pending Q4 close. Design templates selected." },
+    { id: "md-4", action: "Optimized marketplace profile copy", status: "complete", detail: "Updated Perpetual Outcomes profile with latest metrics. SEO keywords added. Hero image recommendations provided." },
+  ];
+
+  const stageColors: Record<string, "default" | "info" | "warning" | "success"> = {
+    draft: "default",
+    review: "warning",
+    scheduled: "info",
+    published: "success",
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Website Visitors" value="4,281/mo" change={15.3} changeLabel="vs last month" />
+        <StatCard label="Email Open Rate" value="34.2%" change={3.8} changeLabel="vs avg" />
+        <StatCard label="Social Followers" value="2,847" change={12.1} changeLabel="vs last quarter" />
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle>Marketing Agent Drafts</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {agentDrafts.map((item) => (
+              <div key={item.id} className="border border-slate-200 rounded-lg p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-slate-900">{item.action}</p>
+                      <Badge variant={item.status === "ready for review" ? "warning" : item.status === "in progress" ? "info" : "success"}>
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-600">{item.detail}</p>
+                  </div>
+                  {item.status === "ready for review" && (
+                    <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0">Review</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Campaign Calendar</CardTitle></CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50">
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Campaign</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Channel</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Dates</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Status</th>
+                  <th className="text-right py-3 px-4 text-slate-500 font-medium">Raised / Goal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {campaigns.map((c) => (
+                  <tr key={c.id} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="py-3 px-4 font-medium text-slate-900">{c.name}</td>
+                    <td className="py-3 px-4 text-slate-600">{c.channel}</td>
+                    <td className="py-3 px-4 text-slate-600 text-xs">
+                      {formatDate(c.startDate)}{c.startDate !== c.endDate ? ` – ${formatDate(c.endDate)}` : ""}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge variant={c.status === "complete" ? "success" : c.status === "active" ? "info" : c.status === "scheduled" ? "warning" : "default"}>
+                        {c.status}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      {c.goal > 0 ? (
+                        <span className="font-medium">{formatCurrency(c.raised)} <span className="text-slate-400">/ {formatCurrency(c.goal)}</span></span>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader><CardTitle>Email Performance</CardTitle></CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="text-left py-2 px-3 text-slate-500 font-medium">Campaign</th>
+                    <th className="text-right py-2 px-3 text-slate-500 font-medium">Open %</th>
+                    <th className="text-right py-2 px-3 text-slate-500 font-medium">Click %</th>
+                    <th className="text-right py-2 px-3 text-slate-500 font-medium">Unsub %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {emailPerformance.map((e, i) => (
+                    <tr key={i} className="border-b border-slate-50">
+                      <td className="py-2 px-3">
+                        <p className="font-medium text-slate-900 text-xs">{e.name}</p>
+                        <p className="text-xs text-slate-500">{formatDate(e.sent)} &middot; {e.recipients.toLocaleString()} sent</p>
+                      </td>
+                      <td className="py-2 px-3 text-right font-medium">{e.openRate}%</td>
+                      <td className="py-2 px-3 text-right font-medium">{e.clickRate}%</td>
+                      <td className="py-2 px-3 text-right text-slate-500">{e.unsubRate}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Content Pipeline</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {contentPipeline.map((item, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-900 truncate">{item.title}</p>
+                    <p className="text-xs text-slate-500">{item.type} &middot; {item.assignee}</p>
+                  </div>
+                  <Badge variant={stageColors[item.stage] ?? "default"}>
+                    {item.stage}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────── Board Tab ──────────────────────────── */
+
+function BoardTab({
+  grants,
+  transactions,
+  programs,
+  outcomes,
+}: {
+  grants: Grant[];
+  transactions: Transaction[];
+  programs: Program[];
+  outcomes: Outcome[];
+}) {
+  const boardMembers = [
+    { name: "Sarah Chen", title: "Board Chair", committee: "Executive", term: "2024–2027", joined: "2021" },
+    { name: "Michael Rodriguez", title: "Vice Chair", committee: "Executive, Programs", term: "2025–2028", joined: "2022" },
+    { name: "Priya Patel", title: "Treasurer", committee: "Finance, Audit", term: "2024–2027", joined: "2021" },
+    { name: "David Washington", title: "Secretary", committee: "Governance", term: "2025–2028", joined: "2023" },
+    { name: "Lisa Nakamura", title: "Director", committee: "Programs", term: "2026–2029", joined: "2026" },
+    { name: "James O'Brien", title: "Director", committee: "Development", term: "2024–2027", joined: "2024" },
+    { name: "Maria Santos", title: "Director", committee: "Finance", term: "2025–2028", joined: "2025" },
+    { name: "Robert Kim", title: "Director", committee: "Governance, Audit", term: "2026–2029", joined: "2026" },
+    { name: "Angela Foster", title: "Director", committee: "Development, Programs", term: "2024–2027", joined: "2024" },
+  ];
+
+  const committees = [
+    { name: "Executive Committee", members: 3, nextMeeting: "2026-12-05", chair: "Sarah Chen" },
+    { name: "Finance & Audit", members: 3, nextMeeting: "2026-12-08", chair: "Priya Patel" },
+    { name: "Programs", members: 3, nextMeeting: "2027-01-10", chair: "Michael Rodriguez" },
+    { name: "Development", members: 2, nextMeeting: "2027-01-15", chair: "James O'Brien" },
+  ];
+
+  const agendaItems = [
+    { time: "4:00 PM", item: "Call to Order & Approval of Minutes", duration: "10 min", presenter: "Sarah Chen" },
+    { time: "4:10 PM", item: "Executive Director's Report", duration: "15 min", presenter: "ED" },
+    { time: "4:25 PM", item: "Financial Report — Q3 Actuals & Q4 Forecast", duration: "20 min", presenter: "Priya Patel" },
+    { time: "4:45 PM", item: "Program Outcomes Review", duration: "15 min", presenter: "Michael Rodriguez" },
+    { time: "5:00 PM", item: "Year-End Fundraising Update", duration: "10 min", presenter: "James O'Brien" },
+    { time: "5:10 PM", item: "2027 Budget Discussion — First Read", duration: "20 min", presenter: "Priya Patel" },
+    { time: "5:30 PM", item: "Strategic Planning Committee Formation", duration: "15 min", presenter: "Sarah Chen" },
+    { time: "5:45 PM", item: "New Business & Adjournment", duration: "15 min", presenter: "Sarah Chen" },
+  ];
+
+  const boardPackets = [
+    { name: "December 2026 Board Packet", date: "2026-12-06", status: "generating", pages: 42 },
+    { name: "October 2026 Board Packet", date: "2026-10-11", status: "complete", pages: 38 },
+    { name: "August 2026 Board Packet", date: "2026-08-09", status: "complete", pages: 35 },
+    { name: "June 2026 Board Packet", date: "2026-06-13", status: "complete", pages: 41 },
+  ];
+
+  const agentActivity = [
+    { id: "ba-1", action: "Generating December board packet", status: "in progress", detail: "Financial statements, program dashboards, and fundraising summary compiled. ED narrative section pending. Estimated 42 pages." },
+    { id: "ba-2", action: "Drafted October meeting minutes", status: "approved", detail: "Minutes drafted from audio notes and action items. 8 action items tracked, 6 complete, 2 pending." },
+    { id: "ba-3", action: "Board dashboard updated with Q3 outcomes", status: "complete", detail: "All program metrics current through September. Outcome performance at 87% aggregate. Dashboard link emailed to board." },
+    { id: "ba-4", action: "Prepared 2027 budget comparison worksheet", status: "ready for review", detail: "Side-by-side comparison of 2026 actuals (through Oct) vs 2027 proposed budget. Variance analysis included." },
+  ];
+
+  const income = transactions.filter((t) => t.direction === "inflow").reduce((s, t) => s + t.amount, 0);
+  const expenses = transactions.filter((t) => t.direction === "outflow").reduce((s, t) => s + t.amount, 0);
+  const allMetrics = outcomes.flatMap((o) => o.metrics);
+  const avgPct = allMetrics.length > 0
+    ? Math.round(allMetrics.reduce((s, m) => s + (m.value / m.target) * 100, 0) / allMetrics.length)
+    : 0;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Board Members" value={String(boardMembers.length)} />
+        <StatCard label="Next Meeting" value="Dec 12, 2026" />
+        <StatCard label="Committees" value={`${committees.length} Active`} />
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle>Board Agent Activity</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {agentActivity.map((item) => (
+              <div key={item.id} className="border border-slate-200 rounded-lg p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-slate-900">{item.action}</p>
+                      <Badge variant={item.status === "ready for review" ? "warning" : item.status === "in progress" ? "info" : "success"}>
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-600">{item.detail}</p>
+                  </div>
+                  {item.status === "ready for review" && (
+                    <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0">Review</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader><CardTitle>Board Members</CardTitle></CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="text-left py-2 px-3 text-slate-500 font-medium">Name</th>
+                    <th className="text-left py-2 px-3 text-slate-500 font-medium">Role</th>
+                    <th className="text-left py-2 px-3 text-slate-500 font-medium">Committee(s)</th>
+                    <th className="text-left py-2 px-3 text-slate-500 font-medium">Term</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {boardMembers.map((m, i) => (
+                    <tr key={i} className="border-b border-slate-50">
+                      <td className="py-2 px-3 font-medium text-slate-900">{m.name}</td>
+                      <td className="py-2 px-3 text-slate-600">{m.title}</td>
+                      <td className="py-2 px-3 text-slate-600 text-xs">{m.committee}</td>
+                      <td className="py-2 px-3 text-slate-500 text-xs">{m.term}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Committees</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {committees.map((c, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{c.name}</p>
+                    <p className="text-xs text-slate-500">Chair: {c.chair} &middot; {c.members} members</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-500">Next meeting</p>
+                    <p className="text-sm font-medium text-slate-700">{formatDate(c.nextMeeting)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle>Next Meeting Agenda — December 12, 2026</CardTitle></CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50">
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Time</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Agenda Item</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Duration</th>
+                  <th className="text-left py-3 px-4 text-slate-500 font-medium">Presenter</th>
+                </tr>
+              </thead>
+              <tbody>
+                {agendaItems.map((a, i) => (
+                  <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="py-3 px-4 text-slate-600 font-mono text-xs">{a.time}</td>
+                    <td className="py-3 px-4 font-medium text-slate-900">{a.item}</td>
+                    <td className="py-3 px-4 text-slate-500">{a.duration}</td>
+                    <td className="py-3 px-4 text-slate-600">{a.presenter}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Board Packets</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {boardPackets.map((p, i) => (
+              <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">{p.name}</p>
+                  <p className="text-xs text-slate-500">{formatDate(p.date)} &middot; {p.pages} pages</p>
+                </div>
+                <Badge variant={p.status === "complete" ? "success" : "info"}>
+                  {p.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader><CardTitle>Financial Snapshot</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Revenue YTD</span>
+              <span className="font-medium text-emerald-600">{formatCurrency(income)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Expenses YTD</span>
+              <span className="font-medium text-rose-600">{formatCurrency(expenses)}</span>
+            </div>
+            <div className="flex justify-between text-sm border-t border-slate-200 pt-2">
+              <span className="text-slate-900 font-medium">Net Position</span>
+              <span className="font-bold text-slate-900">{formatCurrency(income - expenses)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Active Grants</span>
+              <span className="font-medium">{grants.filter((g) => g.status === "active" || g.status === "awarded").length}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Program Performance</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {programs.slice(0, 4).map((p) => {
+              const po = outcomes.filter((o) => o.programId === p.id);
+              const ms = po.flatMap((o) => o.metrics);
+              const pct = ms.length > 0 ? Math.round(ms.reduce((s, m) => s + (m.value / m.target) * 100, 0) / ms.length) : 0;
+              return (
+                <div key={p.id} className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-900 font-medium truncate mr-2">{p.name}</span>
+                    <span className="text-slate-500 shrink-0">{pct}%</span>
+                  </div>
+                  <Progress value={pct} color={pct >= 80 ? "success" : pct >= 60 ? "warning" : "danger"} />
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Outcome Score</CardTitle></CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center py-4">
+              <div className="text-5xl font-bold text-brand-600">{avgPct}%</div>
+              <p className="text-sm text-slate-500 mt-2">Aggregate outcome performance</p>
+              <p className="text-xs text-slate-400 mt-1">{allMetrics.length} metrics across {programs.length} programs</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
