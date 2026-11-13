@@ -226,6 +226,9 @@ export default function OSShell({ children }: { children: ReactNode }) {
             setChatAgent(id.replace("chat-", "") as AgentType);
           } else if (id === "toggle-sidebar") {
             setCollapsed((c) => !c);
+          } else if (id === "export-finance-csv") {
+            window.location.hash = "finance";
+            setTimeout(() => window.dispatchEvent(new CustomEvent("export-finance-csv")), 300);
           }
         }}
       />

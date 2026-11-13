@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   getGrants,
   getConstituents,
@@ -1187,7 +1187,7 @@ function FinanceTab({
     },
   ];
 
-  function exportCSV() {
+  const exportCSV = useCallback(() => {
     const headers = ["Date", "Description", "Category", "Direction", "Amount"];
     const rows = transactions.map((t) => [
       t.date,
@@ -1204,7 +1204,13 @@ function FinanceTab({
     a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }
+  }, [transactions]);
+
+  useEffect(() => {
+    const handler = () => exportCSV();
+    window.addEventListener("export-finance-csv", handler);
+    return () => window.removeEventListener("export-finance-csv", handler);
+  }, [exportCSV]);
 
   return (
     <div className="space-y-6">
