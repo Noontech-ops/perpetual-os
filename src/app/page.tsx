@@ -19,10 +19,10 @@ export default function Home() {
               For Nonprofits
             </Link>
             <Link
-              href="/login"
+              href="/outcomes"
               className="text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
             >
-              Sign In
+              Get Started
             </Link>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function Home() {
                 <li><Link href="/os" className="hover:text-white transition-colors">For Nonprofits</Link></li>
                 <li><Link href="/outcomes" className="hover:text-white transition-colors">For Donors</Link></li>
                 <li><Link href="/board" className="hover:text-white transition-colors">Board View</Link></li>
-                <li><Link href="/org/bay-area-literacy-coalition" className="hover:text-white transition-colors">Sample Organization</Link></li>
+                <li><Link href="/outcomes/org/org-sfmfb" className="hover:text-white transition-colors">Sample Organization</Link></li>
               </ul>
             </div>
             <div>

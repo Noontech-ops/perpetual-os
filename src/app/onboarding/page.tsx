@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useAuth } from '@/lib/auth-context';
 
 type Step = 'org' | 'programs' | 'agents' | 'done';
 
@@ -15,7 +14,6 @@ interface EinResult {
 }
 
 export default function OnboardingPage() {
-  const { user } = useAuth();
   const [step, setStep] = useState<Step>('org');
   const [orgName, setOrgName] = useState('');
   const [ein, setEin] = useState('');
@@ -86,24 +84,22 @@ export default function OnboardingPage() {
   async function handleFinish() {
     setFinishing(true);
     setStep('done');
-    if (user) {
-      try {
-        const validPrograms = programs.filter(p => p.name.trim());
-        await fetch('/api/organizations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: orgName,
-            legalName: einLookup?.found ? einLookup.name : orgName,
-            ein: ein.replace(/\D/g, '') || undefined,
-            mission,
-            sector,
-            programs: validPrograms.length > 0 ? validPrograms : undefined,
-            agents,
-          }),
-        });
-      } catch {}
-    }
+    try {
+      const validPrograms = programs.filter(p => p.name.trim());
+      await fetch('/api/organizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: orgName,
+          legalName: einLookup?.found ? einLookup.name : orgName,
+          ein: ein.replace(/\D/g, '') || undefined,
+          mission,
+          sector,
+          programs: validPrograms.length > 0 ? validPrograms : undefined,
+          agents,
+        }),
+      });
+    } catch {}
     setTimeout(() => { window.location.href = '/os'; }, 2000);
   }
 

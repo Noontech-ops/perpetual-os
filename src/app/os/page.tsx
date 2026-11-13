@@ -33,8 +33,11 @@ const tabs = [
   "Grants Agent",
   "Donors",
   "Finance",
+  "Compliance",
   "Programs",
   "Outcomes",
+  "Marketing",
+  "Board",
 ] as const;
 type Tab = (typeof tabs)[number];
 
@@ -75,6 +78,27 @@ export default function OSDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+
+  const hashToTab: Record<string, Tab> = {
+    "#grants": "Grants Agent",
+    "#donors": "Donors",
+    "#finance": "Finance",
+    "#compliance": "Compliance",
+    "#programs": "Programs",
+    "#outcomes": "Outcomes",
+    "#marketing": "Marketing",
+    "#board": "Board",
+  };
+
+  useEffect(() => {
+    function onHash() {
+      const t = hashToTab[window.location.hash];
+      if (t) setActiveTab(t);
+    }
+    onHash();
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -232,6 +256,16 @@ export default function OSDashboard() {
       )}
       {activeTab === "Outcomes" && (
         <OutcomesTab programs={programs} outcomes={outcomes} />
+      )}
+      {activeTab === "Compliance" && <ComplianceTab grants={grants} />}
+      {activeTab === "Marketing" && <MarketingTab />}
+      {activeTab === "Board" && (
+        <BoardTab
+          grants={grants}
+          transactions={transactions}
+          programs={programs}
+          outcomes={outcomes}
+        />
       )}
     </div>
   );

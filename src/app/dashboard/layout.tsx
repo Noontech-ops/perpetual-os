@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   const initials = user?.user_metadata?.full_name
     ? user.user_metadata.full_name
@@ -167,21 +167,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             >
               Marketplace &#8599;
             </Link>
-            {user ? (
-              <button
-                onClick={signOut}
-                className="text-sm text-slate-400 hover:text-red-400 transition-colors"
-              >
-                Sign out
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                className="text-sm text-emerald-400 hover:text-emerald-300 font-medium"
-              >
-                Sign in
-              </Link>
-            )}
             <div className="w-8 h-8 rounded-full bg-emerald-600/20 flex items-center justify-center text-emerald-400 text-sm font-medium">
               {initials}
             </div>

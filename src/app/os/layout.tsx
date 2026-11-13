@@ -35,7 +35,7 @@ export default function OSLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [chatAgent, setChatAgent] = useState<AgentType | null>(null);
   const initials = user?.user_metadata?.full_name
     ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
@@ -134,15 +134,6 @@ export default function OSLayout({ children }: { children: ReactNode }) {
             <Link href="/outcomes" className="text-sm text-slate-500 hover:text-brand-600">
               View public page &#8599;
             </Link>
-            {user ? (
-              <button onClick={signOut} className="text-sm text-slate-500 hover:text-red-600">
-                Sign out
-              </button>
-            ) : (
-              <Link href="/login" className="text-sm text-brand-600 hover:text-brand-700 font-medium">
-                Sign in
-              </Link>
-            )}
             <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 text-sm font-medium">
               {initials}
             </div>
