@@ -79,20 +79,19 @@ export default function OSDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const hashToTab: Record<string, Tab> = {
-    "#grants": "Grants Agent",
-    "#donors": "Donors",
-    "#finance": "Finance",
-    "#compliance": "Compliance",
-    "#programs": "Programs",
-    "#outcomes": "Outcomes",
-    "#marketing": "Marketing",
-    "#board": "Board",
-  };
-
   useEffect(() => {
+    const map: Record<string, Tab> = {
+      "#grants": "Grants Agent",
+      "#donors": "Donors",
+      "#finance": "Finance",
+      "#compliance": "Compliance",
+      "#programs": "Programs",
+      "#outcomes": "Outcomes",
+      "#marketing": "Marketing",
+      "#board": "Board",
+    };
     function onHash() {
-      const t = hashToTab[window.location.hash];
+      const t = map[window.location.hash];
       if (t) setActiveTab(t);
     }
     onHash();
@@ -1489,3 +1488,4 @@ function OutcomesTab({
     </div>
   );
 }
+
