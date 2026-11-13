@@ -21,7 +21,7 @@ export function Sidebar({
     >
       <div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
         {!collapsed && (
-          <span className="text-lg font-bold text-indigo-600">Perpetual OS</span>
+          <span className="text-lg font-bold text-brand-600">Perpetual OS</span>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -80,7 +80,7 @@ export function SidebarItem({
       className={cn(
         "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         active
-          ? "bg-indigo-50 text-indigo-700"
+          ? "bg-brand-50 text-brand-700"
           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
       )}
     >
@@ -90,7 +90,7 @@ export function SidebarItem({
         <span
           className={cn(
             "rounded-full px-2 py-0.5 text-xs font-medium",
-            active ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-600"
+            active ? "bg-brand-100 text-brand-700" : "bg-slate-100 text-slate-600"
           )}
         >
           {badge}

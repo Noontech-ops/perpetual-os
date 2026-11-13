@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 const colorStyles = {
-  default: "bg-indigo-600",
+  default: "bg-brand-600",
   success: "bg-emerald-500",
   warning: "bg-amber-500",
   danger: "bg-rose-500",

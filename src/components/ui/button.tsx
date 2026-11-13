@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 
 const variantStyles = {
-  primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:ring-indigo-500",
+  primary: "bg-brand-600 text-white hover:bg-brand-700 focus-visible:ring-brand-500",
   secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200 focus-visible:ring-slate-400",
   outline: "border border-slate-200 text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-400",
   ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900",

@@ -39,10 +39,10 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-50 to-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-xl bg-brand-600 flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">P</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Sign in to Perpetual</h1>
@@ -58,7 +58,7 @@ function LoginForm() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="you@example.com"
             />
           </div>
@@ -81,7 +81,7 @@ function LoginForm() {
                   setError('');
                   alert('Check your email for a password reset link.');
                 }}
-                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                className="text-xs text-brand-600 hover:text-brand-700 font-medium"
               >
                 Forgot password?
               </button>
@@ -92,7 +92,7 @@ function LoginForm() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="••••••••"
             />
           </div>
@@ -102,7 +102,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            className="w-full py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50 transition-colors"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
@@ -110,7 +110,7 @@ function LoginForm() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link href="/signup" className="text-brand-600 hover:text-brand-700 font-medium">
             Sign up
           </Link>
         </p>
@@ -121,7 +121,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-50 to-gray-50"><p className="text-gray-400">Loading...</p></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-gray-50"><p className="text-gray-400">Loading...</p></div>}>
       <LoginForm />
     </Suspense>
   );

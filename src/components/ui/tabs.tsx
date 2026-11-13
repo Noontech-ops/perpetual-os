@@ -50,7 +50,7 @@ export function TabsTrigger({
       className={cn(
         "px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2",
         isActive
-          ? "border-indigo-600 text-indigo-600"
+          ? "border-brand-600 text-brand-600"
           : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300",
         className
       )}

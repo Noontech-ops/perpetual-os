@@ -58,8 +58,8 @@ export function AgentChat({ agentType, onClose }: { agentType: AgentType; onClos
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 flex flex-col" style={{ height: '70vh' }}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
-              <span className="text-indigo-600 text-sm font-bold">AI</span>
+            <div className="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center">
+              <span className="text-brand-600 text-sm font-bold">AI</span>
             </div>
             <span className="font-semibold text-gray-900">{agentLabels[agentType]}</span>
           </div>
@@ -80,7 +80,7 @@ export function AgentChat({ agentType, onClose }: { agentType: AgentType; onClos
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] px-4 py-2 rounded-xl text-sm whitespace-pre-wrap ${
                 m.role === 'user'
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-brand-600 text-white'
                   : 'bg-gray-100 text-gray-900'
               }`}>
                 {m.content}
@@ -102,12 +102,12 @@ export function AgentChat({ agentType, onClose }: { agentType: AgentType; onClos
               value={input}
               onChange={e => setInput(e.target.value)}
               placeholder={`Ask ${agentLabels[agentType]}...`}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+              className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50"
             >
               Send
             </button>

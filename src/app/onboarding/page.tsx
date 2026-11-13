@@ -109,7 +109,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <div className="mb-8 text-center">
-          <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-xl bg-brand-600 flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">P</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Set up Perpetual OS</h1>
@@ -120,8 +120,8 @@ export default function OnboardingPage() {
           {(['org', 'programs', 'agents'] as const).map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === s ? 'bg-indigo-600 text-white' :
-                (['org', 'programs', 'agents'].indexOf(step) > i) ? 'bg-indigo-100 text-indigo-700' :
+                step === s ? 'bg-brand-600 text-white' :
+                (['org', 'programs', 'agents'].indexOf(step) > i) ? 'bg-brand-100 text-brand-700' :
                 'bg-gray-200 text-gray-500'
               }`}>
                 {i + 1}
@@ -139,7 +139,7 @@ export default function OnboardingPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">EIN (optional)</label>
                 <div className="relative">
                   <input value={ein} onChange={e => handleEinChange(e.target.value)} placeholder="XX-XXXXXXX"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500" />
                   {einLoading && (
                     <span className="absolute right-3 top-2.5 text-xs text-gray-400">Looking up...</span>
                   )}
@@ -156,22 +156,22 @@ export default function OnboardingPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Organization name</label>
                 <input value={orgName} onChange={e => setOrgName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Mission statement</label>
                 <textarea value={mission} onChange={e => setMission(e.target.value)} rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Primary sector</label>
                 <select value={sector} onChange={e => setSector(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
                   {sectors.map(s => <option key={s} value={s}>{s.replace('_', ' & ').replace(/^\w/, c => c.toUpperCase())}</option>)}
                 </select>
               </div>
               <button onClick={() => setStep('programs')} disabled={!orgName}
-                className="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50">
+                className="w-full py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50">
                 Continue
               </button>
             </div>
@@ -184,18 +184,18 @@ export default function OnboardingPage() {
               {programs.map((p, i) => (
                 <div key={i} className="space-y-2 p-4 bg-gray-50 rounded-lg">
                   <input value={p.name} onChange={e => { const next = [...programs]; next[i].name = e.target.value; setPrograms(next); }}
-                    placeholder="Program name" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    placeholder="Program name" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500" />
                   <textarea value={p.description} onChange={e => { const next = [...programs]; next[i].description = e.target.value; setPrograms(next); }}
-                    placeholder="Brief description" rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    placeholder="Brief description" rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500" />
                 </div>
               ))}
               <button onClick={() => setPrograms([...programs, { name: '', description: '' }])}
-                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                className="text-sm text-brand-600 hover:text-brand-700 font-medium">
                 + Add another program
               </button>
               <div className="flex gap-3">
                 <button onClick={() => setStep('org')} className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Back</button>
-                <button onClick={() => setStep('agents')} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">Continue</button>
+                <button onClick={() => setStep('agents')} className="flex-1 py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700">Continue</button>
               </div>
             </div>
           )}
@@ -209,7 +209,7 @@ export default function OnboardingPage() {
                   <button key={a.id} onClick={() => toggleAgent(a.id)}
                     className={`p-4 rounded-lg border text-left transition-colors ${
                       agents.includes(a.id)
-                        ? 'border-indigo-600 bg-indigo-50'
+                        ? 'border-brand-600 bg-brand-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}>
                     <div className="font-medium text-sm text-gray-900">{a.name}</div>
@@ -220,7 +220,7 @@ export default function OnboardingPage() {
               <div className="flex gap-3">
                 <button onClick={() => setStep('programs')} className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Back</button>
                 <button onClick={handleFinish} disabled={finishing}
-                  className="flex-1 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50">
+                  className="flex-1 py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50">
                   {finishing ? 'Setting up...' : 'Launch Perpetual OS'}
                 </button>
               </div>
