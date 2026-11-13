@@ -1,6 +1,6 @@
-import type { Organization, Outcome, Sector } from './types';
+import type { Organization, Outcome, Program, Sector } from './types';
 
-type MarketplaceOrg = Organization & { outcomes: Outcome[] };
+type MarketplaceOrg = Organization & { outcomes: Outcome[]; programs: Program[] };
 
 const mkOrg = (
   id: string, name: string, sector: Sector, mission: string,
@@ -15,7 +15,7 @@ const mkOrg = (
   phone: '', email: '',
   leadership: leaders ?? [],
   financials,
-  programIds: [],
+  programIds: outcomes.map((_, i) => `${id}-prog-${i}`),
   publicProfile: true,
   slug: id,
   createdAt: '2024-01-01T00:00:00Z',
@@ -26,6 +26,21 @@ const mkOrg = (
     sector,
     reportingPeriod: '2026-Q1-Q4',
     metrics: o.metrics.map(m => ({ ...m, periodStart: '2026-01-01', periodEnd: '2026-12-31' })),
+    createdAt: '2024-01-01T00:00:00Z',
+  })),
+  programs: outcomes.map((o, i) => ({
+    id: `${id}-prog-${i}`,
+    name: o.title,
+    description: `${o.title} — tracking ${o.metrics.map(m => m.label.toLowerCase()).join(', ')}.`,
+    sector,
+    status: 'active' as const,
+    startDate: '2024-01-01',
+    annualBudget: Math.round(financials.annualBudget / outcomes.length),
+    ytdSpend: Math.round((financials.totalExpenses / outcomes.length) * 0.85),
+    staffCount: Math.max(2, Math.round(financials.annualBudget / outcomes.length / 100000)),
+    clientsServed: o.metrics[0]?.value ?? 0,
+    outcomeIds: [`${id}-out-${i}`],
+    grantIds: [],
     createdAt: '2024-01-01T00:00:00Z',
   })),
 });

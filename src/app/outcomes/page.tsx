@@ -267,8 +267,26 @@ export default function OutcomesExplorePage() {
         )}
 
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-slate-500">No nonprofits match your filters. Try broadening your search.</p>
+          <div className="text-center py-20 space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto">
+              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <path strokeLinecap="round" d="M21 21l-4.35-4.35" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-700">No results found</h3>
+            <p className="text-slate-500 max-w-md mx-auto">
+              No nonprofits match your current filters. Try a different cause area, broaden your geography, or clear your search.
+            </p>
+            <button
+              onClick={() => { setSearch(""); setCause("All"); setGeo("All"); }}
+              className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 mt-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset all filters
+            </button>
           </div>
         )}
       </section>

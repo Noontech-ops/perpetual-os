@@ -218,7 +218,7 @@ export default function HowItWorksPage() {
               ))}
             </div>
             <div className="text-center mt-12">
-              <Link href="/dashboard" className="inline-flex px-6 py-3 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors">
+              <Link href="/os" className="inline-flex px-6 py-3 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors">
                 View Demo Dashboard
               </Link>
             </div>
@@ -255,7 +255,7 @@ export default function HowItWorksPage() {
               ))}
             </div>
             <div className="text-center mt-12">
-              <Link href="/dashboard/agents" className="inline-flex px-6 py-3 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">
+              <Link href="/os#grants" className="inline-flex px-6 py-3 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">
                 Try the Agents
               </Link>
             </div>
@@ -349,7 +349,7 @@ export default function HowItWorksPage() {
               <Link href="/outcomes#explore" className="px-6 py-3 bg-white text-emerald-700 text-sm font-semibold rounded-lg hover:bg-emerald-50 transition-colors">
                 Explore Nonprofits
               </Link>
-              <Link href="/dashboard" className="px-6 py-3 border border-emerald-300 text-white text-sm font-semibold rounded-lg hover:bg-emerald-500 transition-colors">
+              <Link href="/os" className="px-6 py-3 border border-emerald-300 text-white text-sm font-semibold rounded-lg hover:bg-emerald-500 transition-colors">
                 See the Nonprofit OS
               </Link>
             </div>
