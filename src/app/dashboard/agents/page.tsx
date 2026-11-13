@@ -10,6 +10,25 @@ interface Message {
   content: string;
 }
 
+function renderMarkdown(text: string) {
+  const lines = text.split('\n');
+  return lines.map((line, i) => {
+    if (line.startsWith('## ')) {
+      return <p key={i} className="font-semibold text-base mt-3 mb-1">{line.slice(3)}</p>;
+    }
+    if (line.startsWith('# ')) {
+      return <p key={i} className="font-bold text-lg mt-3 mb-1">{line.slice(2)}</p>;
+    }
+    const formatted = line
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    if (formatted !== line) {
+      return <p key={i} dangerouslySetInnerHTML={{ __html: formatted }} />;
+    }
+    return <p key={i}>{line || ' '}</p>;
+  });
+}
+
 const agents: { type: AgentType; label: string; desc: string }[] = [
   { type: "grants", label: "Grants Agent", desc: "Find and manage grant opportunities" },
   { type: "donor_relations", label: "Donor Relations", desc: "Donor engagement and stewardship" },
@@ -288,7 +307,7 @@ function AgentChatInner() {
                     : "bg-slate-800 text-slate-200 border border-slate-700/50"
                 }`}
               >
-                {m.content}
+                {m.role === "assistant" ? renderMarkdown(m.content) : m.content}
                 {streaming && i === messages.length - 1 && m.role === "assistant" && (
                   <span className="inline-block w-1.5 h-4 bg-emerald-400 ml-0.5 animate-pulse rounded-sm" />
                 )}

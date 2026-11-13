@@ -263,7 +263,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Pricing */}
-        <section className="bg-slate-50 py-20 px-6">
+        <section id="pricing" className="bg-slate-50 py-20 px-6">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-14">
               <span className="inline-block px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-full uppercase tracking-wide mb-3">Pricing</span>
