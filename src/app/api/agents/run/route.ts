@@ -17,8 +17,12 @@ export async function POST(request: Request) {
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Anthropic API key not configured' }, { status: 503 });
+    if (!apiKey || apiKey === 'proxy-injected') {
+      return NextResponse.json({
+        response: `## ${agentType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} Agent Analysis\n\nBased on Bay Area Literacy Coalition's data:\n- Annual Budget: $${mock.organization.financials.annualBudget.toLocaleString()}\n- Revenue: $${mock.organization.financials.totalRevenue.toLocaleString()}\n- ${mock.programs.length} active programs serving ${mock.programs.reduce((s, p) => s + p.clientsServed, 0).toLocaleString()} clients\n\n*This is a demo response. Connect your Anthropic API key for live AI analysis.*`,
+        actions: [],
+        stopReason: 'end_turn',
+      });
     }
 
     let orgContext = '';

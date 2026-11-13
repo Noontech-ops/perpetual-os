@@ -17,8 +17,16 @@ export async function POST(request: Request) {
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Anthropic API key not configured' }, { status: 503 });
+    if (!apiKey || apiKey === 'proxy-injected') {
+      const demoResponses: Record<string, string> = {
+        grants: 'Based on your current pipeline of ' + mock.grants.filter(g => g.status === 'active' || g.status === 'awarded').length + ' active grants, I recommend focusing on the SF Foundation renewal ($75K) due in 90 days. Your 87% outcome achievement rate positions you well. I can draft the renewal proposal.',
+        donor_relations: 'Your donor base includes ' + mock.constituents.filter(c => c.type === 'donor').length + ' donors. Top priority: stewardship outreach to Sarah Chen ($47.5K lifetime, score 92). I also flagged Michael Torres for an upgrade ask — 36 consecutive monthly gifts.',
+        finance: `Cash position: $${mock.organization.financials.cashOnHand.toLocaleString()} with ${mock.organization.financials.monthsOfRunway} months runway. Revenue ($${mock.organization.financials.totalRevenue.toLocaleString()}) is tracking 91% of budget. Recommend building unrestricted reserves to 6 months.`,
+        compliance: 'Form 990 is on track for May 2027 filing. Immediate priority: CA RRF-1 annual registration. All donor acknowledgments are current — 30-day rule met for all gifts over $250.',
+        marketing: 'Year-end campaign opportunity: your 342 adult learners and 567 youth served are compelling impact numbers. I recommend a 4-week email series starting December 1 with projected raise of $65K–$85K.',
+        board: `Board packet summary: Revenue $${mock.organization.financials.totalRevenue.toLocaleString()} (91% of budget), 87% outcome score, 3.4 months runway. Key decision needed: FY2027 budget approval including new Digital Equity program.`,
+      };
+      return NextResponse.json({ response: demoResponses[agentType] ?? demoResponses.grants });
     }
 
     const orgContext = `Organization: ${JSON.stringify(mock.organization)}

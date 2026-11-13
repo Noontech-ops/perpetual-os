@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  title: "Explore Nonprofits",
+  description:
+    "Discover nonprofits by actual impact metrics. Browse by cause area, compare outcomes, and give any way you want.",
+};
 
 export default function OutcomesLayout({ children }: { children: ReactNode }) {
   return (
@@ -22,7 +29,7 @@ export default function OutcomesLayout({ children }: { children: ReactNode }) {
               <Link href="/outcomes/portfolio" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
                 Portfolio
               </Link>
-              <Link href="/outcomes#how-it-works" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
+              <Link href="/how-it-works" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
                 How It Works
               </Link>
             </div>
@@ -55,23 +62,23 @@ export default function OutcomesLayout({ children }: { children: ReactNode }) {
               <ul className="space-y-2 text-slate-500">
                 <li><Link href="/outcomes" className="hover:text-emerald-600">Explore Nonprofits</Link></li>
                 <li><Link href="/outcomes/portfolio" className="hover:text-emerald-600">Your Portfolio</Link></li>
-                <li><Link href="/outcomes#how-it-works" className="hover:text-emerald-600">How It Works</Link></li>
+                <li><Link href="/how-it-works" className="hover:text-emerald-600">How It Works</Link></li>
               </ul>
             </div>
             <div>
               <p className="font-semibold text-slate-900 mb-3">For Nonprofits</p>
               <ul className="space-y-2 text-slate-500">
                 <li><Link href="/os" className="hover:text-emerald-600">Perpetual OS</Link></li>
-                <li><Link href="/" className="hover:text-emerald-600">Pricing</Link></li>
+                <li><Link href="/how-it-works#pricing" className="hover:text-emerald-600">Pricing</Link></li>
               </ul>
             </div>
             <div>
               <p className="font-semibold text-slate-900 mb-3">Giving Rails</p>
               <ul className="space-y-2 text-slate-500">
-                <li>Card &amp; ACH</li>
-                <li>Donor Advised Fund</li>
-                <li>Stock &amp; Crypto</li>
-                <li>QCD &amp; Bequest</li>
+                <li><Link href="/how-it-works#pricing" className="hover:text-emerald-600">Card &amp; ACH</Link></li>
+                <li><Link href="/how-it-works#pricing" className="hover:text-emerald-600">Donor Advised Fund</Link></li>
+                <li><Link href="/how-it-works#pricing" className="hover:text-emerald-600">Stock &amp; Crypto</Link></li>
+                <li><Link href="/how-it-works#pricing" className="hover:text-emerald-600">QCD &amp; Bequest</Link></li>
               </ul>
             </div>
           </div>

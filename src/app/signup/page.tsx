@@ -19,29 +19,37 @@ export default function SignupPage() {
     setLoading(true);
     setError('');
 
-    const { createClient } = await import('@/lib/supabase/client');
-    const supabase = createClient();
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName, role },
-      },
-    });
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName, role },
+        },
+      });
 
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-      return;
+      if (signUpError) {
+        if (signUpError.message.includes('database') || signUpError.message.includes('schema')) {
+          setError('Service temporarily unavailable. Please try again in a moment.');
+        } else {
+          setError(signUpError.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (!signInError) {
+        window.location.href = role === 'org_admin' ? '/onboarding' : '/outcomes';
+        return;
+      }
+
+      setSuccess(true);
+    } catch {
+      setError('Unable to connect to authentication service. Please try again later.');
     }
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    if (!signInError) {
-      window.location.href = role === 'org_admin' ? '/onboarding' : '/outcomes';
-      return;
-    }
-
-    setSuccess(true);
     setLoading(false);
   }
 

@@ -302,6 +302,12 @@ export default function OutcomesExplorePage() {
               </div>
             ))}
           </div>
+          <div className="text-center mt-10">
+            <Link href="/how-it-works" className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700">
+              Learn more about how it all works
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </Link>
+          </div>
         </div>
       </section>
     </div>

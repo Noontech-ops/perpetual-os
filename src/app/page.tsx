@@ -193,7 +193,7 @@ export default function Home() {
             <div>
               <h4 className="text-sm font-semibold text-white mb-3">Resources</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
+                <li><Link href="/how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
                 <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">API</a></li>
               </ul>
