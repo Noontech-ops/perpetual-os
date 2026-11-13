@@ -19,11 +19,18 @@ function renderMarkdown(text: string) {
     if (line.startsWith('# ')) {
       return <p key={i} className="font-bold text-lg mt-3 mb-1">{line.slice(2)}</p>;
     }
-    const formatted = line
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>');
-    if (formatted !== line) {
-      return <p key={i} dangerouslySetInnerHTML={{ __html: formatted }} />;
+    if (/\*\*.+?\*\*|\*.+?\*/.test(line)) {
+      const parts: React.ReactNode[] = [];
+      let rem = line;
+      let k = 0;
+      while (rem) {
+        const m = rem.match(/(\*\*(.+?)\*\*|\*(.+?)\*)/);
+        if (!m || m.index === undefined) { parts.push(rem); break; }
+        if (m.index > 0) parts.push(rem.slice(0, m.index));
+        parts.push(m[0].startsWith('**') ? <strong key={k++}>{m[2]}</strong> : <em key={k++}>{m[3]}</em>);
+        rem = rem.slice(m.index + m[0].length);
+      }
+      return <p key={i}>{parts}</p>;
     }
     return <p key={i}>{line || ' '}</p>;
   });

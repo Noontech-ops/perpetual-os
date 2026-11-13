@@ -333,8 +333,52 @@ function OverviewTab({
     .filter((t) => t.direction === "inflow")
     .slice(0, 5);
 
+  const quickActions = [
+    { label: "Draft Grant Proposal", hash: "#grants", icon: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8", color: "bg-blue-50 text-blue-600" },
+    { label: "Send Donor Update", hash: "#donors", icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6", color: "bg-emerald-50 text-emerald-600" },
+    { label: "Review Compliance", hash: "#compliance", icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z", color: "bg-amber-50 text-amber-600" },
+    { label: "Prepare Board Packet", hash: "#board", icon: "M2 7h20v14H2zM16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16", color: "bg-purple-50 text-purple-600" },
+  ];
+
+  const activityFeed = [
+    { agent: "Grants Agent", text: "Found 3 new funding opportunities matching literacy programs", time: "12 min ago", dot: "bg-blue-500" },
+    { agent: "Compliance", text: "Form 990 deadline approaching — draft is 85% complete", time: "1 hr ago", dot: "bg-amber-500" },
+    { agent: "Finance", text: "Detected 8% budget variance in Education program expenses", time: "2 hrs ago", dot: "bg-red-500" },
+    { agent: "Marketing", text: "Drafted Year-End Campaign email — ready for review", time: "3 hrs ago", dot: "bg-purple-500" },
+    { agent: "Donor Relations", text: "Flagged 12 lapsed donors for re-engagement outreach", time: "5 hrs ago", dot: "bg-emerald-500" },
+    { agent: "Board Agent", text: "Prepared Q4 financial summary for December board meeting", time: "6 hrs ago", dot: "bg-indigo-500" },
+    { agent: "Grants Agent", text: "Submitted progress report for Meyer Memorial Trust grant", time: "Yesterday", dot: "bg-blue-500" },
+    { agent: "Compliance", text: "Updated state registrations for CA, OR, and WA", time: "Yesterday", dot: "bg-amber-500" },
+  ];
+
+  const healthCategories = [
+    { label: "Financial", score: 92, color: "bg-emerald-500" },
+    { label: "Compliance", score: 88, color: "bg-amber-500" },
+    { label: "Programs", score: 95, color: "bg-blue-500" },
+    { label: "Fundraising", score: 78, color: "bg-purple-500" },
+  ];
+  const overallHealth = Math.round(healthCategories.reduce((s, c) => s + c.score, 0) / healthCategories.length);
+
   return (
     <div className="space-y-6">
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {quickActions.map((qa) => (
+          <a
+            key={qa.label}
+            href={qa.hash}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:shadow-sm transition-shadow`}
+          >
+            <div className={`w-10 h-10 rounded-lg ${qa.color} flex items-center justify-center shrink-0`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path d={qa.icon} />
+              </svg>
+            </div>
+            <span className="text-sm font-medium text-slate-700">{qa.label}</span>
+          </a>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Revenue YTD"
@@ -491,6 +535,75 @@ function OverviewTab({
                   <span className="text-sm font-semibold text-emerald-600 shrink-0">
                     +{formatCurrency(tx.amount)}
                   </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Activity Feed + Health Score */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {activityFeed.map((item, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="relative mt-1">
+                    <div className={`w-2.5 h-2.5 rounded-full ${item.dot}`} />
+                    {i < activityFeed.length - 1 && (
+                      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-px h-6 bg-slate-200" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-900">
+                      <span className="font-medium">{item.agent}</span>{" "}
+                      <span className="text-slate-600">{item.text}</span>
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">{item.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Organization Health</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="text-center">
+              <div className="relative w-28 h-28 mx-auto">
+                <svg className="w-28 h-28 -rotate-90" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="#e2e8f0" strokeWidth="10" />
+                  <circle
+                    cx="60" cy="60" r="50" fill="none"
+                    stroke={overallHealth >= 90 ? "#10b981" : overallHealth >= 75 ? "#f59e0b" : "#ef4444"}
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray={`${(overallHealth / 100) * 314} 314`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-slate-900">{overallHealth}</span>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wide">Score</span>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {healthCategories.map((cat) => (
+                <div key={cat.label}>
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span className="text-slate-600">{cat.label}</span>
+                    <span className="font-medium text-slate-900">{cat.score}/100</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${cat.color}`} style={{ width: `${cat.score}%` }} />
+                  </div>
                 </div>
               ))}
             </div>
