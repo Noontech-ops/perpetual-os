@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
 
   const response = await updateSession(request);
 
-  if (pathname.startsWith('/os') || pathname.startsWith('/onboarding') || pathname.startsWith('/dashboard')) {
+  if (pathname.startsWith('/onboarding')) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !key || key === 'proxy-injected') return response;
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
       }
     } catch {
-      // Auth check failed — let the page load rather than redirect-loop
+      // Auth check failed — let the page load
     }
   }
 
