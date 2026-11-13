@@ -57,15 +57,20 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
         const pubRes = await fetch(`/api/organizations/public?slug=${encodeURIComponent(orgId)}`);
         if (pubRes.ok) {
           const raw = await pubRes.json();
-          setOrg(camelizeKeys(raw) as OrgWithDetails);
-          setLoading(false);
-          return;
+          if (raw && raw.name) {
+            setOrg(camelizeKeys(raw) as OrgWithDetails);
+            setLoading(false);
+            return;
+          }
         }
         // Fallback to search API (by id)
         const res = await fetch(`/api/search?id=${encodeURIComponent(orgId)}`);
         if (res.ok) {
           const raw = await res.json();
-          setOrg(camelizeKeys(raw) as OrgWithDetails);
+          const match = Array.isArray(raw) ? raw.find((o: { id?: string; slug?: string }) => o.id === orgId || o.slug === orgId) : raw;
+          if (match && match.name) {
+            setOrg(camelizeKeys(match) as OrgWithDetails);
+          }
         }
       } catch {}
       setLoading(false);
@@ -449,7 +454,7 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
               {leadershipList.length > 0 ? leadershipList.map((l) => (
                 <div key={l.name} className="border border-slate-200 rounded-lg p-5 flex gap-4">
                   <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium shrink-0">
-                    {l.name.split(" ").map((n: string) => n[0]).join("")}
+                    {(l.name || "").split(" ").map((n: string) => n[0]).join("")}
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900">{l.name}</p>
