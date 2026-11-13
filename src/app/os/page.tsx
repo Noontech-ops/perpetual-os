@@ -256,7 +256,7 @@ export default function OSDashboard() {
       {activeTab === "Outcomes" && (
         <OutcomesTab programs={programs} outcomes={outcomes} />
       )}
-      {activeTab === "Compliance" && <ComplianceTab grants={grants} />}
+      {activeTab === "Compliance" && <ComplianceTab />}
       {activeTab === "Marketing" && <MarketingTab />}
       {activeTab === "Board" && (
         <BoardTab
@@ -1604,7 +1604,7 @@ function OutcomesTab({
 
 /* ──────────────────────────── Compliance Tab ──────────────────────────── */
 
-function ComplianceTab({ grants }: { grants: Grant[] }) {
+function ComplianceTab() {
   const filings = [
     { name: "IRS Form 990", due: "2027-05-15", status: "drafting", assignee: "Compliance Agent" },
     { name: "CA RRF-1 (Registry of Charitable Trusts)", due: "2027-04-15", status: "not started", assignee: "Compliance Agent" },
