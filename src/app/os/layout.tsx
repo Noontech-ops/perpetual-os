@@ -85,7 +85,7 @@ export default function OSLayout({ children }: { children: ReactNode }) {
             </svg>
           </button>
         </div>
-        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+        <nav aria-label="OS navigation" className="flex-1 p-2 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/os" && pathname.startsWith(item.href));
             return (
@@ -122,6 +122,7 @@ export default function OSLayout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => { setMobileOpen(true); setCollapsed(false); }}
+              aria-label="Open navigation menu"
               className="md:hidden text-slate-500 hover:text-slate-700"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,14 +140,14 @@ export default function OSLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main id="main-content" className="flex-1 p-6 overflow-auto">{children}</main>
       </div>
 
       {/* Agent Chat FAB */}
       <button
         onClick={() => setChatAgent('grants')}
         className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 flex items-center justify-center z-40"
-        title="Chat with AI Agent"
+        aria-label="Open AI Agent chat"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

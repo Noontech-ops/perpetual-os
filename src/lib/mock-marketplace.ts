@@ -669,32 +669,36 @@ export const marketplaceOrgs: MarketplaceOrg[] = [
 ];
 
 const enrichment: Record<string, OrgExtra> = {
-  'org-symphony': { ein: '94-1156284', founded: '1911-12-08', website: 'sfsymphony.org', vision: 'A world where orchestral music is central to a thriving, connected community.', street: '201 Van Ness Ave', zip: '94102' },
-  'org-kqed': { ein: '94-1241309', founded: '1954-04-05', website: 'kqed.org', vision: 'A more informed, empathetic, and creative Northern California.', street: '2601 Mariposa St', zip: '94110' },
-  'org-sfmfb': { ein: '94-1408871', founded: '1987-09-15', website: 'sfmfoodbank.org', vision: 'A community where every person has access to nutritious food to sustain a healthy life.', street: '900 Pennsylvania Ave', zip: '94107' },
-  'org-habitat': { ein: '94-3112516', founded: '1990-03-22', website: 'habitatgsf.org', vision: 'A world where everyone has a decent place to live.', street: '360 Ritch St', zip: '94107' },
-  'org-sffc': { ein: '94-3138890', founded: '1993-06-01', website: 'sffreeclinic.org', vision: 'Quality healthcare accessible to every San Franciscan regardless of ability to pay.', street: '4900 California St', zip: '94118' },
-  'org-sfjazz': { ein: '94-2767007', founded: '1983-01-15', website: 'sfjazz.org', vision: 'A world where jazz is a vibrant, evolving art form embraced by diverse audiences.', street: '201 Franklin St', zip: '94102' },
-  'org-bgcsf': { ein: '94-0845498', founded: '1891-05-10', website: 'kidsclub.org', vision: 'A city where every young person reaches their full potential.', street: '555 Portola Dr', zip: '94131' },
-  'org-sfaf': { ein: '94-2927405', founded: '1982-05-01', website: 'sfaf.org', vision: 'A world without HIV/AIDS and the stigma that surrounds it.', street: '1035 Market St', zip: '94103' },
+  'org-symphony': { ein: '94-1156284', founded: '1911-12-08', website: 'sfsymphony.org', vision: 'A world where orchestral music is central to a thriving, connected community.', street: '201 Van Ness Ave', zip: '94102', phone: '(415) 864-6000', email: 'info@sfsymphony.org' },
+  'org-kqed': { ein: '94-1241309', founded: '1954-04-05', website: 'kqed.org', vision: 'A more informed, empathetic, and creative Northern California.', street: '2601 Mariposa St', zip: '94110', phone: '(415) 553-2100', email: 'memberservices@kqed.org' },
+  'org-sfmfb': { ein: '94-1408871', founded: '1987-09-15', website: 'sfmfoodbank.org', vision: 'A community where every person has access to nutritious food to sustain a healthy life.', street: '900 Pennsylvania Ave', zip: '94107', phone: '(415) 282-1900', email: 'info@sfmfoodbank.org' },
+  'org-habitat': { ein: '94-3112516', founded: '1990-03-22', website: 'habitatgsf.org', vision: 'A world where everyone has a decent place to live.', street: '360 Ritch St', zip: '94107', phone: '(415) 625-1000', email: 'info@habitatgsf.org' },
+  'org-sffc': { ein: '94-3138890', founded: '1993-06-01', website: 'sffreeclinic.org', vision: 'Quality healthcare accessible to every San Franciscan regardless of ability to pay.', street: '4900 California St', zip: '94118', phone: '(415) 750-9894', email: 'info@sffreeclinic.org' },
+  'org-sfjazz': { ein: '94-2767007', founded: '1983-01-15', website: 'sfjazz.org', vision: 'A world where jazz is a vibrant, evolving art form embraced by diverse audiences.', street: '201 Franklin St', zip: '94102', phone: '(866) 920-5299', email: 'info@sfjazz.org' },
+  'org-bgcsf': { ein: '94-0845498', founded: '1891-05-10', website: 'kidsclub.org', vision: 'A city where every young person reaches their full potential.', street: '555 Portola Dr', zip: '94131', phone: '(415) 445-5765', email: 'info@kidsclub.org' },
+  'org-sfaf': { ein: '94-2927405', founded: '1982-05-01', website: 'sfaf.org', vision: 'A world without HIV/AIDS and the stigma that surrounds it.', street: '1035 Market St', zip: '94103', phone: '(415) 487-3000', email: 'info@sfaf.org' },
   'org-826': { ein: '68-0499565', founded: '2002-04-08', website: '826valencia.org', vision: 'A world where every student is a confident, creative writer.', street: '826 Valencia St', zip: '94110' },
-  'org-sfzoo': { ein: '94-1156720', founded: '1929-09-16', website: 'sfzoo.org', vision: 'A future where wildlife and people thrive together through conservation and education.', street: '1 Zoo Rd', zip: '94132' },
+  'org-sfzoo': { ein: '94-1156720', founded: '1929-09-16', website: 'sfzoo.org', vision: 'A future where wildlife and people thrive together.', street: '1 Zoo Rd', zip: '94132' },
   'org-internet-archive': { ein: '94-3242767', founded: '1996-05-10', website: 'archive.org', vision: 'Universal access to all knowledge, preserved forever.', street: '300 Funston Ave', zip: '94118' },
-  'org-glide': { ein: '94-1156316', founded: '1929-01-01', website: 'glide.org', vision: 'A radically inclusive society where all people are free from poverty and marginalization.', street: '330 Ellis St', zip: '94102' },
-  'org-baykeeper': { ein: '94-3218772', founded: '1989-11-01', website: 'baykeeper.org', vision: 'A clean, healthy San Francisco Bay for generations to come.', street: '1736 Franklin St', zip: '94109' },
+  'org-glide': { ein: '94-1156316', founded: '1929-01-01', website: 'glide.org', vision: 'A radically inclusive society where all people are free from poverty and marginalization.', street: '330 Ellis St', zip: '94102', phone: '(415) 674-6000', email: 'info@glide.org' },
+  'org-baykeeper': { ein: '94-3218772', founded: '1989-11-01', website: 'baykeeper.org', vision: 'A clean, healthy San Francisco Bay for generations to come.', street: '1736 Franklin St', zip: '94109', phone: '(510) 735-9700', email: 'info@baykeeper.org' },
   'org-compass': { ein: '94-1156350', founded: '1914-03-01', website: 'compass-sf.org', vision: 'Every family has a safe home and the opportunity to thrive.', street: '1036 Mission St', zip: '94103' },
   'org-sfmoma': { ein: '94-1156488', founded: '1935-01-18', website: 'sfmoma.org', vision: 'Art is essential to a more just, empathetic, and inspired world.', street: '151 Third St', zip: '94103' },
   'org-legal-aid': { ein: '94-1641048', founded: '1953-10-01', website: 'baylegal.org', vision: 'Equal justice for all, regardless of income.', street: '50 Fremont St', zip: '94105' },
-  'org-larkin': { ein: '94-2917999', founded: '1984-06-15', website: 'larkinstreetyouth.org', vision: 'A city where no young person is without a home, a job, or hope.', street: '134 Golden Gate Ave', zip: '94102' },
+  'org-larkin': { ein: '94-2917999', founded: '1984-06-15', website: 'larkinstreetyouth.org', vision: 'A city where no young person is without a home, a job, or hope.', street: '134 Golden Gate Ave', zip: '94102', phone: '(415) 673-0911', email: 'info@larkinstreetyouth.org' },
   'org-ymca-sf': { ein: '94-0997340', founded: '1853-01-01', website: 'ymcasf.org', vision: 'A San Francisco where every person can thrive in spirit, mind, and body.', street: '169 Steuart St', zip: '94105' },
   'org-wikimedia': { ein: '20-0049703', founded: '2003-06-20', website: 'wikimediafoundation.org', vision: 'A world in which every single human being can freely share in the sum of all knowledge.', street: '1 Montgomery St', zip: '94104' },
   'org-nature-conservancy-ca': { ein: '53-0242652', founded: '1951-10-22', website: 'nature.org/california', vision: 'A world where people and nature thrive together.', street: '201 Mission St', zip: '94105' },
   'org-aclu-nc': { ein: '94-6015534', founded: '1934-07-01', website: 'aclunc.org', vision: 'An America where civil liberties are guaranteed for all.', street: '39 Drumm St', zip: '94111' },
   'org-homebridge': { ein: '94-1158498', founded: '1974-08-01', website: 'homebridgeca.org', vision: 'Every older adult and person with a disability can live independently with dignity.', street: '1035 Market St', zip: '94103' },
+  'org-cal-academy': { ein: '94-1156258', founded: '1853-01-01', website: 'calacademy.org', vision: 'A thriving planet for all species.', street: '55 Music Concourse Dr', zip: '94118', phone: '(415) 379-8000', email: 'contact@calacademy.org' },
+  'org-eff': { ein: '04-3091431', founded: '1990-01-01', website: 'eff.org', vision: 'A future where technology supports freedom, justice, and innovation for all.', street: '815 Eddy St', zip: '94109', phone: '(415) 436-9333', email: 'info@eff.org' },
+  'org-exploratorium': { ein: '94-1696494', founded: '1969-01-01', website: 'exploratorium.edu', vision: 'A world where people think for themselves and can confidently ask questions.', street: 'Pier 15', zip: '94111', phone: '(415) 528-4444', email: 'info@exploratorium.edu' },
+  'org-code2040': { ein: '45-5419360', founded: '2012-01-01', website: 'code2040.org', vision: 'A tech industry that reflects the demographics and diversity of America.', street: '500 3rd St, Ste 530', zip: '94107', phone: '(415) 590-2040', email: 'hello@code2040.org' },
   'org-met-museum': { ein: '13-1624086', founded: '1870-04-13', website: 'metmuseum.org', vision: 'Art connects us all across time and culture.', street: '1000 Fifth Ave', zip: '10028' },
-  'org-robin-hood': { ein: '13-3441066', founded: '1988-01-01', website: 'robinhood.org', vision: 'A New York City where poverty is a thing of the past.', street: '826 Broadway', zip: '10003' },
-  'org-nrdc': { ein: '13-2654926', founded: '1970-01-01', website: 'nrdc.org', vision: 'A world where people and nature thrive together and the air, water, and wild places are protected.', street: '40 West 20th St', zip: '10011' },
-  'org-nypl': { ein: '13-1887440', founded: '1895-05-23', website: 'nypl.org', vision: 'A world where knowledge is free and accessible to everyone.', street: '476 Fifth Ave', zip: '10018' },
+  'org-robin-hood': { ein: '13-3441066', founded: '1988-01-01', website: 'robinhood.org', vision: 'A New York City where poverty is a thing of the past.', street: '826 Broadway', zip: '10003', phone: '(212) 227-6601', email: 'info@robinhood.org' },
+  'org-nrdc': { ein: '13-2654926', founded: '1970-01-01', website: 'nrdc.org', vision: 'A world where people and nature thrive together.', street: '40 West 20th St', zip: '10011' },
+  'org-nypl': { ein: '13-1887440', founded: '1895-05-23', website: 'nypl.org', vision: 'A world where knowledge is free and accessible to everyone.', street: '476 Fifth Ave', zip: '10018', phone: '(917) 275-6975', email: 'asknypl@nypl.org' },
   'org-art-institute-chicago': { ein: '36-1958610', founded: '1879-05-24', website: 'artic.edu', vision: 'Art inspires and transforms the human experience.', street: '111 S Michigan Ave', zip: '60603' },
   'org-khan-academy': { ein: '26-1544963', founded: '2008-09-01', website: 'khanacademy.org', vision: 'A free, world-class education for anyone, anywhere.', street: '314 S El Camino Real', zip: '94040' },
   'org-charity-water': { ein: '22-3936753', founded: '2006-09-01', website: 'charitywater.org', vision: 'A world where every person has clean and safe water to drink.', street: '40 Worth St', zip: '10013' },
@@ -720,14 +724,14 @@ const enrichment: Record<string, OrgExtra> = {
 
 for (const org of marketplaceOrgs) {
   const e = enrichment[org.id];
-  if (e) {
-    if (e.ein) org.ein = e.ein;
-    if (e.founded) org.founded = e.founded;
-    if (e.website) org.website = e.website;
-    if (e.vision) org.vision = e.vision;
-    if (e.street) org.address.street = e.street;
-    if (e.zip) org.address.zip = e.zip;
-    if (e.legalName) org.legalName = e.legalName;
-  }
+  if (!e) continue;
+  if (e.ein) org.ein = e.ein;
+  if (e.founded) org.founded = e.founded;
+  if (e.website) org.website = e.website;
+  if (e.vision) org.vision = e.vision;
+  if (e.street) org.address.street = e.street;
+  if (e.zip) org.address.zip = e.zip;
+  if (e.phone) org.phone = e.phone;
+  if (e.email) org.email = e.email;
+  if (e.legalName) org.legalName = e.legalName;
 }
-

@@ -42,10 +42,15 @@ function getLocation(address: Organization["address"] | undefined): string {
   return [address.city, address.state].filter(Boolean).join(", ");
 }
 
+type SortKey = "name" | "budget" | "founded" | "impact";
+const ITEMS_PER_PAGE = 24;
+
 export default function OutcomesExplorePage() {
   const [search, setSearch] = useState("");
   const [cause, setCause] = useState("All");
   const [geo, setGeo] = useState<string>("All");
+  const [sort, setSort] = useState<SortKey>("budget");
+  const [page, setPage] = useState(1);
   const [orgs, setOrgs] = useState<(Organization & { outcomes?: Outcome[] })[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,6 +61,7 @@ export default function OutcomesExplorePage() {
     const results = await searchOrganizations(q, sector);
     setOrgs(results);
     setLoading(false);
+    setPage(1);
   }, [search, cause]);
 
   useEffect(() => {
@@ -63,7 +69,7 @@ export default function OutcomesExplorePage() {
     return () => clearTimeout(timer);
   }, [fetchOrgs]);
 
-  const filtered = geo === "All" ? orgs : orgs.filter((o) => {
+  const geoFiltered = geo === "All" ? orgs : orgs.filter((o) => {
     const state = o.address?.state ?? "";
     const city = o.address?.city ?? "";
     if (geo === "Local") return city.toLowerCase().includes("san francisco") || state === "CA";
@@ -72,8 +78,20 @@ export default function OutcomesExplorePage() {
     return true;
   });
 
+  const sorted = [...geoFiltered].sort((a, b) => {
+    if (sort === "name") return a.name.localeCompare(b.name);
+    if (sort === "budget") return (b.financials?.annualBudget ?? 0) - (a.financials?.annualBudget ?? 0);
+    if (sort === "founded") return (a.founded ?? "9999").localeCompare(b.founded ?? "9999");
+    const aMetric = a.outcomes?.flatMap(o => o.metrics ?? [])?.[0]?.value ?? 0;
+    const bMetric = b.outcomes?.flatMap(o => o.metrics ?? [])?.[0]?.value ?? 0;
+    return bMetric - aMetric;
+  });
+
+  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
+  const filtered = sorted.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
   return (
-    <div>
+    <div id="main-content">
       {/* Hero */}
       <section className="bg-gradient-to-b from-emerald-50 to-white py-16 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
@@ -91,6 +109,7 @@ export default function OutcomesExplorePage() {
             <input
               type="text"
               placeholder="Search by name, cause, or location..."
+              aria-label="Search nonprofits"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-200 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
@@ -105,11 +124,12 @@ export default function OutcomesExplorePage() {
         <div className="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-slate-200">
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1.5">Cause Area</label>
-            <div className="flex flex-wrap gap-1.5">
+            <div role="group" aria-label="Cause area filters" className="flex flex-wrap gap-1.5">
               {causeAreas.map((c) => (
                 <button
                   key={c}
-                  onClick={() => setCause(c)}
+                  onClick={() => { setCause(c); setPage(1); }}
+                  aria-pressed={cause === c}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                     cause === c
                       ? "bg-emerald-600 text-white"
@@ -123,11 +143,12 @@ export default function OutcomesExplorePage() {
           </div>
           <div className="border-l border-slate-200 pl-4">
             <label className="block text-xs font-medium text-slate-500 mb-1.5">Geography</label>
-            <div className="flex flex-wrap gap-1.5">
+            <div role="group" aria-label="Geography filters" className="flex flex-wrap gap-1.5">
               {geographies.map((g) => (
                 <button
                   key={g}
-                  onClick={() => setGeo(g)}
+                  onClick={() => { setGeo(g); setPage(1); }}
+                  aria-pressed={geo === g}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                     geo === g
                       ? "bg-emerald-600 text-white"
@@ -141,10 +162,27 @@ export default function OutcomesExplorePage() {
           </div>
         </div>
 
-        {/* Results count */}
-        <p className="text-sm text-slate-500 mb-6">
-          {loading ? "Searching..." : `${filtered.length} nonprofit${filtered.length !== 1 ? "s" : ""} found`}
-        </p>
+        {/* Results count + sort */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm text-slate-500">
+            {loading ? "Searching..." : `${sorted.length} nonprofit${sorted.length !== 1 ? "s" : ""} found`}
+            {totalPages > 1 && !loading && ` — page ${page} of ${totalPages}`}
+          </p>
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort" className="text-xs text-slate-500">Sort by</label>
+            <select
+              id="sort"
+              value={sort}
+              onChange={(e) => { setSort(e.target.value as SortKey); setPage(1); }}
+              className="text-sm border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value="budget">Budget (high to low)</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="founded">Founded (oldest)</option>
+              <option value="impact">Impact (highest)</option>
+            </select>
+          </div>
+        </div>
 
         {/* Org cards grid */}
         {loading ? (
@@ -202,7 +240,9 @@ export default function OutcomesExplorePage() {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold text-slate-900 leading-snug">{org.name}</h3>
-                        {location && <p className="text-sm text-slate-500 mt-0.5">{location}</p>}
+                        <p className="text-sm text-slate-500 mt-0.5">
+                          {location}{org.founded && org.founded !== '2000-01-01' ? `${location ? ' · ' : ''}Est. ${org.founded.slice(0, 4)}` : ''}
+                        </p>
                       </div>
                       <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 shrink-0">
                         {formatSector(org.sector)}
@@ -266,7 +306,51 @@ export default function OutcomesExplorePage() {
           </div>
         )}
 
-        {!loading && filtered.length === 0 && (
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-10">
+            <button
+              onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              disabled={page === 1}
+              className="px-3 py-2 text-sm font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+              .reduce<(number | 'gap')[]>((acc, p, idx, arr) => {
+                if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('gap');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === 'gap' ? (
+                  <span key={`gap-${i}`} className="px-1 text-slate-400">...</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className={`w-9 h-9 text-sm font-medium rounded-lg transition-colors ${
+                      page === p
+                        ? 'bg-emerald-600 text-white'
+                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+            <button
+              onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              disabled={page === totalPages}
+              className="px-3 py-2 text-sm font-medium rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        )}
+
+        {!loading && sorted.length === 0 && (
           <div className="text-center py-20 space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto">
               <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
