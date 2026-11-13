@@ -1416,8 +1416,47 @@ function ProgramsTab({
   programs: Program[];
   outcomes: Outcome[];
 }) {
+  const totalBudget = programs.reduce((s, p) => s + p.annualBudget, 0);
+  const totalSpend = programs.reduce((s, p) => s + p.ytdSpend, 0);
+  const totalClients = programs.reduce((s, p) => s + p.clientsServed, 0);
+  const activeCount = programs.filter((p) => p.status === "active").length;
+
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard label="Active Programs" value={String(activeCount)} />
+        <StatCard label="Total Budget" value={formatCurrency(totalBudget)} />
+        <StatCard label="YTD Spend" value={formatCurrency(totalSpend)} change={Math.round((totalSpend / totalBudget) * 100 - 100)} changeLabel="vs budget" />
+        <StatCard label="Clients Served" value={totalClients.toLocaleString()} change={12.3} changeLabel="vs last year" />
+      </div>
+
+      {/* Budget utilization chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Budget Utilization by Program</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {programs.map((p) => {
+              const pct = Math.round((p.ytdSpend / p.annualBudget) * 100);
+              return (
+                <div key={p.id} className="flex items-center gap-3">
+                  <span className="text-sm text-slate-600 w-40 truncate shrink-0">{p.name}</span>
+                  <div className="flex-1 h-6 bg-slate-100 rounded-full overflow-hidden relative">
+                    <div
+                      className={cn("h-full rounded-full transition-all", pct >= 90 ? "bg-rose-500" : pct >= 70 ? "bg-amber-500" : "bg-brand-500")}
+                      style={{ width: `${Math.min(pct, 100)}%` }}
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-slate-700">{pct}%</span>
+                  </div>
+                  <span className="text-xs text-slate-500 w-24 text-right shrink-0">{formatCurrency(p.ytdSpend)} / {formatCurrency(p.annualBudget)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {programs.map((program) => {
           const programOutcomes = outcomes.filter(
@@ -1590,6 +1629,37 @@ function OutcomesTab({
           value={`${goalsMet} / ${allMetrics.length}`}
         />
       </div>
+
+      {/* Performance by Program chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance by Program</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {programGroups.map(({ program, programOutcomes }) => {
+              const metrics = programOutcomes.flatMap((o) => o.metrics);
+              const pAvg = metrics.length > 0
+                ? Math.round(metrics.reduce((s, m) => s + (m.value / m.target) * 100, 0) / metrics.length)
+                : 0;
+              const met = metrics.filter((m) => m.value >= m.target).length;
+              return (
+                <div key={program.id} className="flex items-center gap-3">
+                  <span className="text-sm text-slate-600 w-40 truncate shrink-0">{program.name}</span>
+                  <div className="flex-1 h-6 bg-slate-100 rounded-full overflow-hidden relative">
+                    <div
+                      className={cn("h-full rounded-full", pAvg >= 80 ? "bg-emerald-500" : pAvg >= 60 ? "bg-amber-500" : "bg-rose-500")}
+                      style={{ width: `${Math.min(pAvg, 100)}%` }}
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-slate-700">{pAvg}%</span>
+                  </div>
+                  <span className="text-xs text-slate-500 w-20 text-right shrink-0">{met}/{metrics.length} met</span>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {programGroups.map(({ program, programOutcomes }) => (
         <Card key={program.id}>
