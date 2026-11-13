@@ -197,6 +197,68 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <section className="py-20 px-6 bg-slate-50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-12">
+            Built for both sides
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                quote: "Our grants agent found three funders we'd never heard of and drafted LOIs overnight. We've doubled our pipeline.",
+                name: "Maria Chen",
+                role: "Executive Director, Bay Area Literacy Coalition",
+              },
+              {
+                quote: "I can finally see exactly what my donations accomplish — real metrics, not vague impact reports. This is how giving should work.",
+                name: "David Park",
+                role: "Donor, San Francisco",
+              },
+              {
+                quote: "990 prep used to take us three weeks. The compliance agent had a draft ready in two days. We just reviewed and filed.",
+                name: "Sarah Williams",
+                role: "Finance Director, Oakland Youth Arts",
+              },
+            ].map((t) => (
+              <div key={t.name} className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                <p className="text-slate-600 leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
+                <div>
+                  <p className="font-medium text-slate-900 text-sm">{t.name}</p>
+                  <p className="text-xs text-slate-500">{t.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 px-6 bg-gradient-to-r from-brand-600 to-brand-700">
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">
+            Ready to build perpetual impact?
+          </h2>
+          <p className="text-brand-100 text-lg">
+            Free for nonprofits. No credit card required. Import your 990 and go.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/onboarding"
+              className="w-full sm:w-auto px-8 py-3.5 bg-white text-brand-700 rounded-xl text-lg font-medium hover:bg-brand-50 transition-colors text-center"
+            >
+              Start for Free
+            </Link>
+            <Link
+              href="/outcomes"
+              className="w-full sm:w-auto px-8 py-3.5 border-2 border-white/30 text-white rounded-xl text-lg font-medium hover:bg-white/10 transition-colors text-center"
+            >
+              Explore as a Donor
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-300 py-12 px-6">
         <div className="max-w-7xl mx-auto">
