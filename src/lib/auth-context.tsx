@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) {
+    if (!url || !key || key === 'proxy-injected' || url === 'proxy-injected') {
       queueMicrotask(() => setLoading(false));
       return;
     }
