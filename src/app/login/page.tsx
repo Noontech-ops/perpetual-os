@@ -64,7 +64,28 @@ function LoginForm() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email) { setError('Enter your email first'); return; }
+                  setLoading(true);
+                  const { createClient } = await import('@/lib/supabase/client');
+                  const supabase = createClient();
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                  });
+                  setLoading(false);
+                  if (error) { setError(error.message); return; }
+                  setError('');
+                  alert('Check your email for a password reset link.');
+                }}
+                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                Forgot password?
+              </button>
+            </div>
             <input
               id="password"
               type="password"
