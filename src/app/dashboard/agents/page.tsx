@@ -61,7 +61,7 @@ function AgentChatInner() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  }, [conversations, selectedAgent]);
 
   useEffect(() => {
     inputRef.current?.focus();

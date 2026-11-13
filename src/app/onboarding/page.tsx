@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Step = 'org' | 'programs' | 'agents' | 'done';
 
@@ -14,6 +15,7 @@ interface EinResult {
 }
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>('org');
   const [orgName, setOrgName] = useState('');
   const [ein, setEin] = useState('');
@@ -100,7 +102,7 @@ export default function OnboardingPage() {
         }),
       });
     } catch {}
-    setTimeout(() => { window.location.href = '/os'; }, 2000);
+    setTimeout(() => { router.push('/os'); }, 2000);
   }
 
   return (

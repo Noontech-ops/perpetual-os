@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     const { createClient } = await import('@/lib/supabase/client');
     await createClient().auth.signOut();
-    window.location.href = '/login';
+    window.location.href = '/login'; // eslint-disable-line @next/next/no-location-assign-relative-destination -- full reload to clear auth state
   }
 
   return (
