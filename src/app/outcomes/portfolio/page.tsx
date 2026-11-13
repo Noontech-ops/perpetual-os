@@ -130,7 +130,7 @@ export default function PortfolioPage() {
                   <h2 className="font-semibold text-slate-900">Holdings</h2>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full text-sm min-w-[600px]">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200">
                         <th className="text-left py-3 px-5 font-medium text-slate-500">Organization</th>

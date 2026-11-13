@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { OutcomesNav } from "@/components/outcomes-nav";
 
 const agents = [
   {
@@ -82,43 +83,7 @@ export default function HowItWorksPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Nav */}
-      <nav className="border-b border-slate-200 bg-white sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/outcomes" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">P</span>
-              </div>
-              <span className="text-lg font-semibold text-slate-900">
-                Perpetual <span className="text-emerald-600">Outcomes</span>
-              </span>
-            </Link>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/outcomes" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
-                Explore
-              </Link>
-              <Link href="/outcomes/portfolio" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
-                Portfolio
-              </Link>
-              <Link href="/how-it-works" className="text-sm font-medium text-emerald-600 transition-colors">
-                How It Works
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 transition-colors">
-              Sign In
-            </Link>
-            <Link
-              href="/outcomes#explore"
-              className="text-sm font-medium bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              Start Giving
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <OutcomesNav />
 
       <main className="flex-1">
         {/* Hero */}
