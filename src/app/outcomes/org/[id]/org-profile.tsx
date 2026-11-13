@@ -205,6 +205,13 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
                   {org.ein && `EIN ${org.ein}`}
                   {founded && ` · Founded ${founded}`}
                 </p>
+                {org.website && (
+                  <p className="text-sm mt-1">
+                    <a href={org.website.startsWith('http') ? org.website : `https://${org.website}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 hover:underline">
+                      {org.website.replace(/^https?:\/\//, '')}
+                    </a>
+                  </p>
+                )}
                 <p className="text-slate-600 mt-2 leading-relaxed">{org.mission}</p>
               </div>
             </div>
@@ -250,6 +257,37 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
                 <div>
                   <h3 className="font-semibold text-slate-900 mb-2">Vision</h3>
                   <p className="text-sm text-slate-600 leading-relaxed">{org.vision}</p>
+                </div>
+              )}
+
+              {(org.address?.street || org.phone || org.email) && (
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-3">Contact</h3>
+                  <div className="grid sm:grid-cols-2 gap-3 text-sm text-slate-600">
+                    {org.address?.street && (
+                      <div>
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-0.5">Address</p>
+                        <p>{org.address.street}</p>
+                        <p>{[org.address.city, org.address.state].filter(Boolean).join(", ")} {org.address.zip}</p>
+                      </div>
+                    )}
+                    {(org.phone || org.email) && (
+                      <div>
+                        {org.phone && (
+                          <>
+                            <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-0.5">Phone</p>
+                            <p>{org.phone}</p>
+                          </>
+                        )}
+                        {org.email && (
+                          <div className={org.phone ? "mt-2" : ""}>
+                            <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-0.5">Email</p>
+                            <p>{org.email}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

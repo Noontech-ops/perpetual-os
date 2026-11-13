@@ -1,9 +1,33 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
+function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 sm:hidden">
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={onClose} />
+      <nav className="fixed top-0 right-0 h-full w-64 bg-white shadow-xl p-6 flex flex-col gap-6 animate-slide-in">
+        <button onClick={onClose} aria-label="Close menu" className="self-end p-1 text-slate-500 hover:text-slate-900">
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <Link href="/outcomes" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">For Donors</Link>
+        <Link href="/os" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">For Nonprofits</Link>
+        <Link href="/how-it-works" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">How It Works</Link>
+        <Link href="/login" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">Sign In</Link>
+        <Link href="/outcomes" onClick={onClose} className="mt-2 text-center bg-brand-600 text-white px-4 py-2.5 rounded-lg hover:bg-brand-700 transition-colors font-medium">Get Started</Link>
+      </nav>
+    </div>
+  );
+}
+
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <nav aria-label="Main navigation" className="border-b border-slate-200 bg-white">
+      <nav aria-label="Main navigation" className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
@@ -12,27 +36,31 @@ export default function Home() {
             <span className="text-xl font-semibold text-slate-900">Perpetual</span>
           </div>
           <div className="flex items-center gap-4 sm:gap-6">
-            <Link href="/outcomes" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
+            <Link href="/outcomes" className="text-sm text-slate-600 hover:text-slate-900 transition-colors hidden sm:inline">
               For Donors
             </Link>
-            <Link href="/os" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
+            <Link href="/os" className="text-sm text-slate-600 hover:text-slate-900 transition-colors hidden sm:inline">
               For Nonprofits
             </Link>
-            <Link href="/how-it-works" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:inline">
+            <Link href="/how-it-works" className="text-sm text-slate-600 hover:text-slate-900 transition-colors hidden sm:inline">
               How It Works
             </Link>
             <Link
               href="/outcomes"
-              className="text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
+              className="text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors hidden sm:inline"
             >
               Get Started
             </Link>
+            <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="sm:hidden p-1 text-slate-600 hover:text-slate-900">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
           </div>
         </div>
       </nav>
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <main id="main-content" className="flex-1 flex flex-col items-center justify-center px-6">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
+        <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-up">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight">
             The operating system for{" "}
             <span className="text-brand-600">perpetual</span> impact
@@ -59,7 +87,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-6xl mx-auto mt-24 mb-16 grid md:grid-cols-2 gap-12">
-          <div className="space-y-6">
+          <div className="space-y-6 rounded-2xl border border-slate-100 p-8 transition-shadow hover:shadow-lg">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-sm font-medium">
               For Nonprofits
             </div>
@@ -82,7 +110,7 @@ export default function Home() {
               ))}
             </ul>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-6 rounded-2xl border border-slate-100 p-8 transition-shadow hover:shadow-lg">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium">
               For Donors
             </div>
