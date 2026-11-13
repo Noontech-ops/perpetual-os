@@ -75,11 +75,17 @@ export default function PortfolioPage() {
 
   const maxMonthly = Math.max(...monthlyGiving.map((m) => m.amount), 1);
 
-  const causeAllocation = holdings.map((h, i) => ({
-    cause: h.sector,
-    pct: totalGiven > 0 ? Math.round((h.totalGiven / totalGiven) * 1000) / 10 : 0,
-    color: causeColors[i % causeColors.length],
-  }));
+  const causeMap = new Map<string, number>();
+  for (const h of holdings) {
+    causeMap.set(h.sector, (causeMap.get(h.sector) ?? 0) + h.totalGiven);
+  }
+  const causeAllocation = Array.from(causeMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([cause, amount], i) => ({
+      cause,
+      pct: totalGiven > 0 ? Math.round((amount / totalGiven) * 1000) / 10 : 0,
+      color: causeColors[i % causeColors.length],
+    }));
 
   const memberSince = profile?.joinedAt
     ? new Date(profile.joinedAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
