@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://perpetual-os-inoon.vercel.app"),
   title: {
     default: "Perpetual — Nonprofit OS + Donor Marketplace",
     template: "%s | Perpetual",

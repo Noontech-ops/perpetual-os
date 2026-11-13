@@ -212,14 +212,51 @@ export default function OSDashboard() {
     );
   }
 
+  const tabHashes: Record<Tab, string> = {
+    Overview: "",
+    "Grants Agent": "#grants",
+    Donors: "#donors",
+    Finance: "#finance",
+    Compliance: "#compliance",
+    Programs: "#programs",
+    Outcomes: "#outcomes",
+    Marketing: "#marketing",
+    Board: "#board",
+  };
+
+  function selectTab(tab: Tab) {
+    setActiveTab(tab);
+    const hash = tabHashes[tab];
+    window.history.replaceState(null, "", hash || window.location.pathname);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  }
+
+  function handleTabKeyDown(e: React.KeyboardEvent, idx: number) {
+    let next = idx;
+    if (e.key === "ArrowRight") next = (idx + 1) % tabs.length;
+    else if (e.key === "ArrowLeft") next = (idx - 1 + tabs.length) % tabs.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = tabs.length - 1;
+    else return;
+    e.preventDefault();
+    selectTab(tabs[next]);
+    const btn = (e.currentTarget.parentElement?.children[next] as HTMLElement);
+    btn?.focus();
+  }
+
   return (
     <div className="space-y-6">
       <div className="border-b border-slate-200 -mt-2">
-        <nav className="flex gap-1 overflow-x-auto flex-nowrap">
-          {tabs.map((tab) => (
+        <div role="tablist" aria-label="Dashboard sections" className="flex gap-1 overflow-x-auto flex-nowrap">
+          {tabs.map((tab, i) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              role="tab"
+              aria-selected={activeTab === tab}
+              aria-controls={`panel-${tab.toLowerCase().replace(/\s+/g, "-")}`}
+              tabIndex={activeTab === tab ? 0 : -1}
+              onClick={() => selectTab(tab)}
+              onKeyDown={(e) => handleTabKeyDown(e, i)}
               className={cn(
                 "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0",
                 activeTab === tab
@@ -230,42 +267,44 @@ export default function OSDashboard() {
               {tab}
             </button>
           ))}
-        </nav>
+        </div>
       </div>
 
-      {activeTab === "Overview" && (
-        <OverviewTab
-          grants={grants}
-          constituents={constituents}
-          transactions={transactions}
-          outcomes={outcomes}
-          agentActions={agentActions}
-          onUpdateAction={handleUpdateAction}
-        />
-      )}
-      {activeTab === "Grants Agent" && (
-        <GrantsAgentTab grants={grants} programs={programs} />
-      )}
-      {activeTab === "Donors" && <DonorsTab constituents={constituents} />}
-      {activeTab === "Finance" && (
-        <FinanceTab transactions={transactions} grants={grants} />
-      )}
-      {activeTab === "Programs" && (
-        <ProgramsTab programs={programs} outcomes={outcomes} />
-      )}
-      {activeTab === "Outcomes" && (
-        <OutcomesTab programs={programs} outcomes={outcomes} />
-      )}
-      {activeTab === "Compliance" && <ComplianceTab />}
-      {activeTab === "Marketing" && <MarketingTab />}
-      {activeTab === "Board" && (
-        <BoardTab
-          grants={grants}
-          transactions={transactions}
-          programs={programs}
-          outcomes={outcomes}
-        />
-      )}
+      <div role="tabpanel" id={`panel-${activeTab.toLowerCase().replace(/\s+/g, "-")}`} aria-label={activeTab}>
+        {activeTab === "Overview" && (
+          <OverviewTab
+            grants={grants}
+            constituents={constituents}
+            transactions={transactions}
+            outcomes={outcomes}
+            agentActions={agentActions}
+            onUpdateAction={handleUpdateAction}
+          />
+        )}
+        {activeTab === "Grants Agent" && (
+          <GrantsAgentTab grants={grants} programs={programs} />
+        )}
+        {activeTab === "Donors" && <DonorsTab constituents={constituents} />}
+        {activeTab === "Finance" && (
+          <FinanceTab transactions={transactions} grants={grants} />
+        )}
+        {activeTab === "Programs" && (
+          <ProgramsTab programs={programs} outcomes={outcomes} />
+        )}
+        {activeTab === "Outcomes" && (
+          <OutcomesTab programs={programs} outcomes={outcomes} />
+        )}
+        {activeTab === "Compliance" && <ComplianceTab />}
+        {activeTab === "Marketing" && <MarketingTab />}
+        {activeTab === "Board" && (
+          <BoardTab
+            grants={grants}
+            transactions={transactions}
+            programs={programs}
+            outcomes={outcomes}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -1148,20 +1187,50 @@ function FinanceTab({
     },
   ];
 
+  function exportCSV() {
+    const headers = ["Date", "Description", "Category", "Direction", "Amount"];
+    const rows = transactions.map((t) => [
+      t.date,
+      t.description,
+      t.category,
+      t.direction,
+      t.amount.toFixed(2),
+    ]);
+    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Total Income YTD" value={formatCurrency(income)} change={12.3} />
-        <StatCard
-          label="Total Expenses YTD"
-          value={formatCurrency(expenses)}
-          change={-3.2}
-        />
-        <StatCard
-          label="Net Position"
-          value={formatCurrency(income - expenses)}
-          change={18.7}
-        />
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1 min-w-0">
+          <StatCard label="Total Income YTD" value={formatCurrency(income)} change={12.3} />
+          <StatCard
+            label="Total Expenses YTD"
+            value={formatCurrency(expenses)}
+            change={-3.2}
+          />
+          <StatCard
+            label="Net Position"
+            value={formatCurrency(income - expenses)}
+            change={18.7}
+          />
+        </div>
+        <button
+          onClick={exportCSV}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shrink-0"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Export CSV
+        </button>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -1778,12 +1847,90 @@ function ComplianceTab() {
 /* ──────────────────────────── Marketing Tab ──────────────────────────── */
 
 function MarketingTab() {
+  const [previewEmail, setPreviewEmail] = useState<string | null>(null);
+
   const campaigns = [
     { id: "mc-1", name: "Year-End Appeal 2026", status: "active", channel: "Email + Social", startDate: "2026-11-15", endDate: "2026-12-31", raised: 28500, goal: 75000 },
     { id: "mc-2", name: "Giving Tuesday", status: "complete", channel: "Email + Social + SMS", startDate: "2026-12-03", endDate: "2026-12-03", raised: 12300, goal: 10000 },
     { id: "mc-3", name: "Spring Newsletter", status: "scheduled", channel: "Email", startDate: "2027-03-01", endDate: "2027-03-01", raised: 0, goal: 0 },
     { id: "mc-4", name: "Annual Report Launch", status: "drafting", channel: "Email + Web", startDate: "2027-02-15", endDate: "2027-02-28", raised: 0, goal: 0 },
   ];
+
+  const emailTemplates: Record<string, { subject: string; preheader: string; from: string; recipients: number; body: string }> = {
+    "Year-End Appeal — Wave 1": {
+      subject: "Your impact this year was extraordinary",
+      preheader: "2,400 lives changed — and we're just getting started",
+      from: "Bay Area Literacy Coalition <hello@bayarealiteracy.org>",
+      recipients: 3420,
+      body: `<div style="font-family: Georgia, serif; color: #1e293b; line-height: 1.7; max-width: 540px; margin: 0 auto;">
+        <p>Dear [First Name],</p>
+        <p>As 2026 comes to a close, I want to share something remarkable: <strong>because of supporters like you, 2,400 adults and children gained literacy skills this year.</strong></p>
+        <p>That’s 2,400 parents who can now read bedtime stories to their kids. 2,400 adults who can fill out a job application with confidence. 2,400 people whose world just got a little bigger.</p>
+        <p>Maria, one of our adult learners, told us last month:</p>
+        <blockquote style="border-left: 3px solid #6366f1; padding-left: 16px; margin: 20px 0; color: #475569; font-style: italic;">“I used to pretend I could read the menu at restaurants. Now I read stories to my daughter every night. That’s what your program gave me.”</blockquote>
+        <p>Your year-end gift will help us reach <strong>3,000 learners in 2027</strong>. Every dollar directly funds tutoring hours, books, and technology for our classrooms.</p>
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="#" style="display: inline-block; background: #4f46e5; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-family: sans-serif; font-size: 15px;">Make Your Year-End Gift</a>
+        </div>
+        <p>With gratitude,<br/><strong>Elena Diaz</strong><br/>Executive Director</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; font-family: sans-serif;">Bay Area Literacy Coalition &middot; 1234 Mission St, San Francisco, CA 94103<br/><a href="#" style="color: #94a3b8;">Unsubscribe</a> &middot; <a href="#" style="color: #94a3b8;">Update preferences</a></p>
+      </div>`,
+    },
+    "Giving Tuesday Countdown": {
+      subject: "In 48 hours, your gift will be DOUBLED",
+      preheader: "A generous donor will match every gift up to $25,000",
+      from: "Bay Area Literacy Coalition <hello@bayarealiteracy.org>",
+      recipients: 3380,
+      body: `<div style="font-family: Georgia, serif; color: #1e293b; line-height: 1.7; max-width: 540px; margin: 0 auto;">
+        <p>Dear [First Name],</p>
+        <p><strong>This Tuesday, December 3rd, is Giving Tuesday</strong> — and we have exciting news.</p>
+        <p>A generous board member has pledged to <strong>match every gift dollar-for-dollar, up to $25,000</strong>. That means your $50 becomes $100. Your $250 becomes $500.</p>
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 20px 0; text-align: center;">
+          <p style="margin: 0; font-size: 28px; font-weight: 700; color: #166534;">$8,200</p>
+          <p style="margin: 4px 0 0; font-size: 13px; color: #15803d; font-family: sans-serif;">matched so far of $25,000 goal</p>
+        </div>
+        <p>Here’s what your matched gift can do:</p>
+        <ul style="padding-left: 20px;">
+          <li><strong>$50 ($100 matched)</strong> — One month of tutoring for an adult learner</li>
+          <li><strong>$150 ($300 matched)</strong> — A full semester of reading materials</li>
+          <li><strong>$500 ($1,000 matched)</strong> — A complete literacy program for one family</li>
+        </ul>
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="#" style="display: inline-block; background: #4f46e5; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-family: sans-serif; font-size: 15px;">Double My Impact</a>
+        </div>
+        <p>The match expires Tuesday at midnight. Don’t wait!</p>
+        <p>With hope,<br/><strong>Elena Diaz</strong><br/>Executive Director</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; font-family: sans-serif;">Bay Area Literacy Coalition &middot; 1234 Mission St, San Francisco, CA 94103<br/><a href="#" style="color: #94a3b8;">Unsubscribe</a> &middot; <a href="#" style="color: #94a3b8;">Update preferences</a></p>
+      </div>`,
+    },
+    "Giving Tuesday — Day Of": {
+      subject: "TODAY ONLY: Every dollar matched — give now",
+      preheader: "12 hours left to double your impact for literacy",
+      from: "Bay Area Literacy Coalition <hello@bayarealiteracy.org>",
+      recipients: 3375,
+      body: `<div style="font-family: Georgia, serif; color: #1e293b; line-height: 1.7; max-width: 540px; margin: 0 auto;">
+        <div style="background: #4f46e5; color: white; text-align: center; padding: 20px; border-radius: 8px; margin-bottom: 24px; font-family: sans-serif;">
+          <p style="margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">Giving Tuesday 2026</p>
+          <p style="margin: 8px 0 0; font-size: 32px; font-weight: 800;">EVERY GIFT DOUBLED</p>
+          <p style="margin: 8px 0 0; font-size: 14px; opacity: 0.9;">Match expires at midnight</p>
+        </div>
+        <p>Dear [First Name],</p>
+        <p><strong>Today is the day.</strong> Every gift made before midnight tonight will be matched dollar-for-dollar.</p>
+        <p>We’re already at <strong>$9,100 of our $25,000 match</strong> — but we need your help to unlock the rest.</p>
+        <p>Think about what literacy means: a mother reading discharge instructions at the hospital. A father helping with homework. A teenager filling out their first college application.</p>
+        <p><strong>That’s what your gift makes possible.</strong></p>
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="#" style="display: inline-block; background: #dc2626; color: white; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; font-family: sans-serif; font-size: 16px;">Give Now — Double Your Impact</a>
+        </div>
+        <p style="text-align: center; font-size: 13px; color: #64748b; font-family: sans-serif;">Tax-deductible &middot; Secure &middot; Takes 30 seconds</p>
+        <p>Thank you for standing with our learners,<br/><strong>Elena Diaz</strong></p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; font-family: sans-serif;">Bay Area Literacy Coalition &middot; 1234 Mission St, San Francisco, CA 94103<br/><a href="#" style="color: #94a3b8;">Unsubscribe</a> &middot; <a href="#" style="color: #94a3b8;">Update preferences</a></p>
+      </div>`,
+    },
+  };
 
   const emailPerformance = [
     { name: "Year-End Appeal — Wave 1", sent: "2026-11-15", recipients: 3420, openRate: 38.2, clickRate: 8.4, unsubRate: 0.3 },
@@ -1815,6 +1962,8 @@ function MarketingTab() {
     scheduled: "info",
     published: "success",
   };
+
+  const activeTemplate = previewEmail ? emailTemplates[previewEmail] : null;
 
   return (
     <div className="space-y-6">
@@ -1904,6 +2053,7 @@ function MarketingTab() {
                     <th className="text-right py-2 px-3 text-slate-500 font-medium">Open %</th>
                     <th className="text-right py-2 px-3 text-slate-500 font-medium">Click %</th>
                     <th className="text-right py-2 px-3 text-slate-500 font-medium">Unsub %</th>
+                    <th className="w-16" />
                   </tr>
                 </thead>
                 <tbody>
@@ -1916,6 +2066,16 @@ function MarketingTab() {
                       <td className="py-2 px-3 text-right font-medium">{e.openRate}%</td>
                       <td className="py-2 px-3 text-right font-medium">{e.clickRate}%</td>
                       <td className="py-2 px-3 text-right text-slate-500">{e.unsubRate}%</td>
+                      <td className="py-2 px-3 text-right">
+                        {emailTemplates[e.name] && (
+                          <button
+                            onClick={() => setPreviewEmail(e.name)}
+                            className="text-xs text-brand-600 hover:text-brand-700 font-medium"
+                          >
+                            Preview
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -1943,6 +2103,31 @@ function MarketingTab() {
           </CardContent>
         </Card>
       </div>
+
+      {activeTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setPreviewEmail(null)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0">
+              <div className="min-w-0">
+                <p className="font-semibold text-slate-900 text-sm truncate">{activeTemplate.subject}</p>
+                <p className="text-xs text-slate-500 mt-0.5">From: {activeTemplate.from} &middot; To: {activeTemplate.recipients.toLocaleString()} recipients</p>
+                <p className="text-xs text-slate-400 mt-0.5">Preview: {activeTemplate.preheader}</p>
+              </div>
+              <button onClick={() => setPreviewEmail(null)} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 shrink-0 ml-4">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 p-6 bg-slate-50">
+              <div className="bg-white border border-slate-200 rounded-lg p-6 max-w-lg mx-auto shadow-sm" dangerouslySetInnerHTML={{ __html: activeTemplate.body }} />
+            </div>
+            <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-slate-200 shrink-0 bg-white">
+              <button className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">Edit Draft</button>
+              <button className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700">Send Test</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
