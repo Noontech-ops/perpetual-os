@@ -4,7 +4,10 @@ import { ReactNode } from "react";
 import { OutcomesNav } from "@/components/outcomes-nav";
 
 export const metadata: Metadata = {
-  title: "Explore Nonprofits",
+  title: {
+    default: "Explore Nonprofits",
+    template: "%s | Perpetual",
+  },
   description:
     "Discover nonprofits by actual impact metrics. Browse by cause area, compare outcomes, and give any way you want.",
 };
