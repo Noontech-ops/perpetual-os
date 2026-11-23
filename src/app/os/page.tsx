@@ -27,6 +27,7 @@ import { Progress } from "@/components/ui/progress";
 import { AgentAction } from "@/components/ui/agent-action";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
+import { useToast } from "@/components/ui/toast";
 
 const tabs = [
   "Overview",
@@ -78,6 +79,8 @@ export default function OSDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const { addToast } = useToast();
 
   useEffect(() => {
     const map: Record<string, Tab> = {
@@ -116,6 +119,7 @@ export default function OSDashboard() {
       setPrograms(p);
       setOutcomes(o);
       setAgentActions(a);
+      setLastUpdated(new Date());
       setLoading(false);
     }).catch((err) => {
       if (cancelled) return;
@@ -131,6 +135,7 @@ export default function OSDashboard() {
       setAgentActions((prev) =>
         prev.map((a) => (a.id === id ? { ...a, status } : a))
       );
+      addToast(`Agent action ${status}`, status === "approved" ? "success" : "info");
     }
   }
 
@@ -247,26 +252,44 @@ export default function OSDashboard() {
   return (
     <div className="space-y-6">
       <div className="border-b border-slate-200 -mt-2">
-        <div role="tablist" aria-label="Dashboard sections" className="flex gap-1 overflow-x-auto flex-nowrap">
-          {tabs.map((tab, i) => (
+        <div className="flex items-center gap-3">
+          <div role="tablist" aria-label="Dashboard sections" className="flex gap-1 overflow-x-auto flex-nowrap flex-1 min-w-0">
+            {tabs.map((tab, i) => (
+              <button
+                key={tab}
+                role="tab"
+                aria-selected={activeTab === tab}
+                aria-controls={`panel-${tab.toLowerCase().replace(/\s+/g, "-")}`}
+                tabIndex={activeTab === tab ? 0 : -1}
+                onClick={() => selectTab(tab)}
+                onKeyDown={(e) => handleTabKeyDown(e, i)}
+                className={cn(
+                  "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0",
+                  activeTab === tab
+                    ? "border-brand-600 text-brand-700"
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                )}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 shrink-0 pb-1">
+            {lastUpdated && (
+              <span className="text-xs text-slate-400 hidden sm:inline">
+                Updated {lastUpdated.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+              </span>
+            )}
             <button
-              key={tab}
-              role="tab"
-              aria-selected={activeTab === tab}
-              aria-controls={`panel-${tab.toLowerCase().replace(/\s+/g, "-")}`}
-              tabIndex={activeTab === tab ? 0 : -1}
-              onClick={() => selectTab(tab)}
-              onKeyDown={(e) => handleTabKeyDown(e, i)}
-              className={cn(
-                "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0",
-                activeTab === tab
-                  ? "border-brand-600 text-brand-700"
-                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
-              )}
+              onClick={() => { setLoading(true); setRetryCount((c) => c + 1); }}
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              aria-label="Refresh dashboard data"
             >
-              {tab}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
             </button>
-          ))}
+          </div>
         </div>
       </div>
 
@@ -662,9 +685,11 @@ function GrantsAgentTab({
   grants: Grant[];
   programs: Program[];
 }) {
+  const { addToast } = useToast();
   const [agentResult, setAgentResult] = useState<string | null>(null);
   const [agentRunning, setAgentRunning] = useState(false);
   const [agentError, setAgentError] = useState<string | null>(null);
+  const [actionedRecs, setActionedRecs] = useState<Record<string, "approved" | "dismissed">>({});
 
   async function handleRunAgent() {
     setAgentRunning(true);
@@ -898,12 +923,26 @@ function GrantsAgentTab({
                     <p className="text-sm text-slate-600">{rec.evidence}</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
-                      Approve
-                    </button>
-                    <button className="px-3 py-1.5 text-xs font-medium text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                      Dismiss
-                    </button>
+                    {actionedRecs[rec.id] ? (
+                      <Badge variant={actionedRecs[rec.id] === "approved" ? "success" : "default"}>
+                        {actionedRecs[rec.id] === "approved" ? "Approved" : "Dismissed"}
+                      </Badge>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => { setActionedRecs((p) => ({ ...p, [rec.id]: "approved" })); addToast(`Approved: ${rec.title}`, "success"); }}
+                          className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => { setActionedRecs((p) => ({ ...p, [rec.id]: "dismissed" })); addToast(`Dismissed: ${rec.title}`, "info"); }}
+                          className="px-3 py-1.5 text-xs font-medium text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                        >
+                          Dismiss
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -918,9 +957,11 @@ function GrantsAgentTab({
 /* ─────────────────────────────── Donors Tab ─────────────────────────────── */
 
 function DonorsTab({ constituents }: { constituents: Constituent[] }) {
+  const { addToast } = useToast();
   const [segment, setSegment] = useState<
     "all" | "major" | "mid" | "grassroots"
   >("all");
+  const [actionedRecs, setActionedRecs] = useState<Record<string, "draft" | "skip">>({});
 
   const donors = constituents.filter((c) => c.type === "donor");
 
@@ -1118,12 +1159,26 @@ function DonorsTab({ constituents }: { constituents: Constituent[] }) {
                     <p className="text-sm text-slate-600">{rec.reason}</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700">
-                      Draft
-                    </button>
-                    <button className="px-3 py-1.5 text-xs font-medium text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50">
-                      Skip
-                    </button>
+                    {actionedRecs[rec.id] ? (
+                      <Badge variant={actionedRecs[rec.id] === "draft" ? "info" : "default"}>
+                        {actionedRecs[rec.id] === "draft" ? "Drafting..." : "Skipped"}
+                      </Badge>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => { setActionedRecs((p) => ({ ...p, [rec.id]: "draft" })); addToast(`Drafting ${rec.action.toLowerCase()} for ${rec.donor}`, "info"); }}
+                          className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700"
+                        >
+                          Draft
+                        </button>
+                        <button
+                          onClick={() => { setActionedRecs((p) => ({ ...p, [rec.id]: "skip" })); addToast(`Skipped recommendation for ${rec.donor}`, "info"); }}
+                          className="px-3 py-1.5 text-xs font-medium text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50"
+                        >
+                          Skip
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1144,6 +1199,7 @@ function FinanceTab({
   transactions: Transaction[];
   grants: Grant[];
 }) {
+  const { addToast } = useToast();
   const income = transactions
     .filter((t) => t.direction === "inflow")
     .reduce((s, t) => s + t.amount, 0);
@@ -1162,6 +1218,8 @@ function FinanceTab({
       budget: g.amountAwarded ?? g.amountRequested,
       spent: g.amountSpent,
     }));
+
+  const [reviewedFinance, setReviewedFinance] = useState<Set<string>>(new Set());
 
   const financeActions = [
     {
@@ -1204,7 +1262,8 @@ function FinanceTab({
     a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [transactions]);
+    addToast(`Exported ${transactions.length} transactions to CSV`, "success");
+  }, [transactions, addToast]);
 
   useEffect(() => {
     const handler = () => exportCSV();
@@ -1392,10 +1451,16 @@ function FinanceTab({
                     </div>
                     <p className="text-sm text-slate-600">{action.detail}</p>
                   </div>
-                  {action.status === "flagged" && (
-                    <button className="px-3 py-1.5 text-xs font-medium bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100 shrink-0">
+                  {action.status === "flagged" && !reviewedFinance.has(action.id) && (
+                    <button
+                      onClick={() => { setReviewedFinance((s) => new Set(s).add(action.id)); addToast(`Reviewed: ${action.action}`, "success"); }}
+                      className="px-3 py-1.5 text-xs font-medium bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100 shrink-0"
+                    >
                       Review
                     </button>
+                  )}
+                  {reviewedFinance.has(action.id) && (
+                    <Badge variant="success">reviewed</Badge>
                   )}
                 </div>
               </div>
@@ -1750,6 +1815,8 @@ function OutcomesTab({
 /* ──────────────────────────── Compliance Tab ──────────────────────────── */
 
 function ComplianceTab() {
+  const { addToast } = useToast();
+  const [reviewedItems, setReviewedItems] = useState<Set<string>>(new Set());
   const filings = [
     { name: "IRS Form 990", due: "2027-05-15", status: "drafting", assignee: "Compliance Agent" },
     { name: "CA RRF-1 (Registry of Charitable Trusts)", due: "2027-04-15", status: "not started", assignee: "Compliance Agent" },
@@ -1821,11 +1888,20 @@ function ComplianceTab() {
                     </div>
                     <p className="text-sm text-slate-600">{item.detail}</p>
                   </div>
-                  {item.status === "action needed" && (
-                    <button className="px-3 py-1.5 text-xs font-medium bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100 shrink-0">Review</button>
+                  {item.status === "action needed" && !reviewedItems.has(item.id) && (
+                    <button
+                      onClick={() => { setReviewedItems((s) => new Set(s).add(item.id)); addToast(`Marked "${item.action.slice(0, 40)}..." as reviewed`, "success"); }}
+                      className="px-3 py-1.5 text-xs font-medium bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100 shrink-0"
+                    >Review</button>
                   )}
-                  {item.status === "ready for review" && (
-                    <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0">Review</button>
+                  {item.status === "ready for review" && !reviewedItems.has(item.id) && (
+                    <button
+                      onClick={() => { setReviewedItems((s) => new Set(s).add(item.id)); addToast(`Reviewed: ${item.action.slice(0, 40)}...`, "success"); }}
+                      className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0"
+                    >Review</button>
+                  )}
+                  {reviewedItems.has(item.id) && (
+                    <Badge variant="success">reviewed</Badge>
                   )}
                 </div>
               </div>
@@ -1923,7 +1999,9 @@ function ComplianceTab() {
 /* ──────────────────────────── Marketing Tab ──────────────────────────── */
 
 function MarketingTab() {
+  const { addToast } = useToast();
   const [previewEmail, setPreviewEmail] = useState<string | null>(null);
+  const [reviewedDrafts, setReviewedDrafts] = useState<Set<string>>(new Set());
 
   const campaigns = [
     { id: "mc-1", name: "Year-End Appeal 2026", status: "active", channel: "Email + Social", startDate: "2026-11-15", endDate: "2026-12-31", raised: 28500, goal: 75000 },
@@ -2065,8 +2143,14 @@ function MarketingTab() {
                     </div>
                     <p className="text-sm text-slate-600">{item.detail}</p>
                   </div>
-                  {item.status === "ready for review" && (
-                    <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0">Review</button>
+                  {item.status === "ready for review" && !reviewedDrafts.has(item.id) && (
+                    <button
+                      onClick={() => { setReviewedDrafts((s) => new Set(s).add(item.id)); addToast(`Reviewed: ${item.action.slice(0, 50)}`, "success"); }}
+                      className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0"
+                    >Review</button>
+                  )}
+                  {reviewedDrafts.has(item.id) && (
+                    <Badge variant="success">reviewed</Badge>
                   )}
                 </div>
               </div>
@@ -2221,6 +2305,9 @@ function BoardTab({
   programs: Program[];
   outcomes: Outcome[];
 }) {
+  const { addToast } = useToast();
+  const [reviewedItems, setReviewedItems] = useState<Set<string>>(new Set());
+
   const boardMembers = [
     { name: "Sarah Chen", title: "Board Chair", committee: "Executive", term: "2024–2027", joined: "2021" },
     { name: "Michael Rodriguez", title: "Vice Chair", committee: "Executive, Programs", term: "2025–2028", joined: "2022" },
@@ -2296,8 +2383,14 @@ function BoardTab({
                     </div>
                     <p className="text-sm text-slate-600">{item.detail}</p>
                   </div>
-                  {item.status === "ready for review" && (
-                    <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0">Review</button>
+                  {item.status === "ready for review" && !reviewedItems.has(item.id) && (
+                    <button
+                      onClick={() => { setReviewedItems((s) => new Set(s).add(item.id)); addToast(`Reviewed: ${item.action.slice(0, 50)}`, "success"); }}
+                      className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 shrink-0"
+                    >Review</button>
+                  )}
+                  {reviewedItems.has(item.id) && (
+                    <Badge variant="success">reviewed</Badge>
                   )}
                 </div>
               </div>

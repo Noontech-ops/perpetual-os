@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 
 const agentConfigs = [
   { key: "grants", label: "Grants Agent", description: "Discovers funders, drafts proposals, tracks deadlines, and manages reporting requirements." },
@@ -46,7 +47,7 @@ export default function SettingsPage() {
   const [website, setWebsite] = useState("https://baliteracy.org");
   const [phone, setPhone] = useState("(415) 555-0142");
   const [address, setAddress] = useState("1234 Mission St, Suite 400, San Francisco, CA 94103");
-  const [profileSaved, setProfileSaved] = useState(false);
+  const { addToast } = useToast();
 
   const [agents, setAgents] = useState<Record<string, { enabled: boolean; approve: ApproveLevel }>>(
     Object.fromEntries(agentConfigs.map((a) => [a.key, { enabled: true, approve: "low" as ApproveLevel }]))
@@ -55,7 +56,10 @@ export default function SettingsPage() {
   const [team] = useState(initialTeam);
 
   function toggleAgent(key: string) {
-    setAgents((prev) => ({ ...prev, [key]: { ...prev[key], enabled: !prev[key].enabled } }));
+    const willEnable = !agents[key].enabled;
+    setAgents((prev) => ({ ...prev, [key]: { ...prev[key], enabled: willEnable } }));
+    const label = agentConfigs.find((a) => a.key === key)?.label ?? key;
+    addToast(`${label} ${willEnable ? "enabled" : "disabled"}`, willEnable ? "success" : "info");
   }
 
   function setApproveLevel(key: string, level: ApproveLevel) {
@@ -63,8 +67,7 @@ export default function SettingsPage() {
   }
 
   function handleProfileSave() {
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 2000);
+    addToast("Organization profile saved", "success");
   }
 
   return (
@@ -142,7 +145,6 @@ export default function SettingsPage() {
               >
                 Save Changes
               </button>
-              {profileSaved && <span className="text-sm text-emerald-600 font-medium">Saved</span>}
             </div>
           </div>
         </CardContent>
@@ -152,7 +154,10 @@ export default function SettingsPage() {
       <Card>
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle>Team Members</CardTitle>
-          <button className="px-3 py-1.5 text-sm font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+          <button
+            onClick={() => addToast("Invite link copied to clipboard", "success")}
+            className="px-3 py-1.5 text-sm font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+          >
             Invite Member
           </button>
         </CardHeader>
@@ -270,11 +275,17 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 {integ.connected ? (
-                  <button className="px-3 py-1.5 text-xs font-medium border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors shrink-0">
+                  <button
+                    onClick={() => addToast(`${integ.name} disconnected`, "info")}
+                    className="px-3 py-1.5 text-xs font-medium border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors shrink-0"
+                  >
                     Disconnect
                   </button>
                 ) : (
-                  <button className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shrink-0">
+                  <button
+                    onClick={() => addToast(`Connecting ${integ.name}...`, "info")}
+                    className="px-3 py-1.5 text-xs font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shrink-0"
+                  >
                     Connect
                   </button>
                 )}
