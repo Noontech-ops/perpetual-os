@@ -298,7 +298,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
           {[
             { value: "116", label: "Nonprofits on the platform" },
-            { value: "12", label: "Cause areas covered" },
+            { value: "10", label: "Cause areas covered" },
             { value: "20+", label: "Cities represented" },
             { value: "6", label: "AI agents per nonprofit" },
           ].map((s) => (
