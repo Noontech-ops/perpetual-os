@@ -2,19 +2,27 @@ import { NextResponse } from 'next/server';
 import { getAuthenticatedClient } from '@/lib/supabase/api-utils';
 
 export async function GET() {
-  const auth = await getAuthenticatedClient();
-  if ('error' in auth) return auth.error;
-  const { supabase, user } = auth;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!key || key === 'proxy-injected') {
+    return NextResponse.json([], { status: 200 });
+  }
+  try {
+    const auth = await getAuthenticatedClient();
+    if ('error' in auth) return auth.error;
+    const { supabase, user } = auth;
 
-  const { data: profile } = await supabase
-    .from('donor_profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
+    const { data: profile } = await supabase
+      .from('donor_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
 
-  if (!profile) return NextResponse.json([]);
+    if (!profile) return NextResponse.json([]);
 
-  return NextResponse.json([profile]);
+    return NextResponse.json([profile]);
+  } catch {
+    return NextResponse.json([], { status: 200 });
+  }
 }
 
 export async function POST(request: Request) {

@@ -31,28 +31,34 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let done = false;
+    const timeout = setTimeout(() => { if (!done) setLoading(false); }, 5000);
     async function load() {
-      const [txs, profiles] = await Promise.all([getGivingTransactions(), getDonorProfiles()]);
-      setTransactions(txs);
-      setProfile(profiles[0] ?? null);
+      try {
+        const [txs, profiles] = await Promise.all([getGivingTransactions(), getDonorProfiles()]);
+        setTransactions(txs);
+        setProfile(profiles[0] ?? null);
 
-      if (txs.length > 0) {
-        const orgIds = [...new Set(txs.map((t) => t.organizationId))];
-        try {
-          const res = await fetch(`/api/search?ids=${orgIds.join(",")}`);
-          if (res.ok) {
-            const orgs = await res.json();
-            const nameMap = new Map<string, { name: string; sector: string }>();
-            for (const o of Array.isArray(orgs) ? orgs : [orgs]) {
-              nameMap.set(o.id, { name: o.name, sector: o.sector || "General" });
+        if (txs.length > 0) {
+          const orgIds = [...new Set(txs.map((t) => t.organizationId))];
+          try {
+            const res = await fetch(`/api/search?ids=${orgIds.join(",")}`);
+            if (res.ok) {
+              const orgs = await res.json();
+              const nameMap = new Map<string, { name: string; sector: string }>();
+              for (const o of Array.isArray(orgs) ? orgs : [orgs]) {
+                nameMap.set(o.id, { name: o.name, sector: o.sector || "General" });
+              }
+              setOrgNames(nameMap);
             }
-            setOrgNames(nameMap);
-          }
-        } catch {}
-      }
+          } catch {}
+        }
+      } catch {}
+      done = true;
       setLoading(false);
     }
     load();
+    return () => clearTimeout(timeout);
   }, []);
 
   const txOrgIds = [...new Set(transactions.map(t => t.organizationId))];

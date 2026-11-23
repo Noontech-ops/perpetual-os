@@ -7,6 +7,11 @@ interface OrgExtra {
   street?: string; zip?: string; phone?: string; email?: string; legalName?: string;
 }
 
+const programBudget = (orgBudget: number, programCount: number, _index: number): number => {
+  const perProgram = (orgBudget * 0.82) / programCount;
+  return Math.round(perProgram);
+};
+
 const mkOrg = (
   id: string, name: string, sector: Sector, mission: string,
   city: string, state: string,
@@ -41,9 +46,9 @@ const mkOrg = (
     sector,
     status: 'active' as const,
     startDate: '2024-01-01',
-    annualBudget: Math.round(financials.annualBudget / outcomes.length),
-    ytdSpend: Math.round((financials.totalExpenses / outcomes.length) * 0.85),
-    staffCount: Math.max(2, Math.round(financials.annualBudget / outcomes.length / 100000)),
+    annualBudget: programBudget(financials.annualBudget, outcomes.length, i),
+    ytdSpend: Math.round(programBudget(financials.annualBudget, outcomes.length, i) * 0.78),
+    staffCount: Math.max(2, Math.round(programBudget(financials.annualBudget, outcomes.length, i) / 100000)),
     clientsServed: o.metrics[0]?.value ?? 0,
     outcomeIds: [`${id}-out-${i}`],
     grantIds: [],
@@ -61,19 +66,29 @@ export const marketplaceOrgs: MarketplaceOrg[] = [
     'Enriching lives through orchestral music, innovative programming, and music education throughout the Bay Area.',
     'San Francisco', 'CA',
     fin(86000000, 82000000, 78000000, 245000000, 42000000, 6.5),
-    [{ title: 'Concert Season Impact', metrics: [{ label: 'Concert Attendees', value: 500000, unit: 'people', target: 600000 }, { label: 'Education Participants', value: 25000, unit: 'students', target: 30000 }] }],
+    [
+      { title: 'Concert Season & Performance', metrics: [{ label: 'Concert Attendees', value: 500000, unit: 'people', target: 600000 }, { label: 'Performances Per Season', value: 220, unit: 'performances', target: 250 }] },
+      { title: 'Music Education', metrics: [{ label: 'Education Participants', value: 25000, unit: 'students', target: 30000 }, { label: 'Schools Served', value: 85, unit: 'schools', target: 100 }] },
+      { title: 'Community Engagement', metrics: [{ label: 'Free Community Events', value: 48, unit: 'events', target: 60 }, { label: 'Community Members Reached', value: 75000, unit: 'people', target: 100000 }] },
+    ],
     [{ name: 'Esa-Pekka Salonen', title: 'Music Director', since: '2020-09-01', bio: 'Internationally acclaimed conductor and composer leading the SFS into its next century.' }, { name: 'Matthew Spivey', title: 'CEO', since: '2022-01-15' }]),
   mkOrg('org-kqed', 'KQED', 'education',
     'Delivering public media content that inspires, informs, and empowers the people of Northern California.',
     'San Francisco', 'CA',
     fin(95000000, 91000000, 88000000, 180000000, 35000000, 4.8),
-    [{ title: 'Media Reach', metrics: [{ label: 'Weekly Viewers & Listeners', value: 5000000, unit: 'people', target: 6000000 }, { label: 'Original News Stories', value: 12000, unit: 'stories', target: 15000 }] }],
+    [
+      { title: 'Broadcast & Digital Media', metrics: [{ label: 'Weekly Viewers & Listeners', value: 5000000, unit: 'people', target: 6000000 }, { label: 'Original News Stories', value: 12000, unit: 'stories', target: 15000 }] },
+      { title: 'Education & Youth Media', metrics: [{ label: 'Students Reached via KQED Learn', value: 320000, unit: 'students', target: 400000 }, { label: 'Teacher Resources Created', value: 2500, unit: 'resources', target: 3000 }] },
+    ],
     [{ name: 'Michael Isip', title: 'President & CEO', since: '2021-06-01' }, { name: 'Priya David Clemens', title: 'VP, News', since: '2019-03-01' }]),
   mkOrg('org-sfmfb', 'SF-Marin Food Bank', 'human_services',
     'Ending hunger in San Francisco and Marin by providing food and nutrition programs to those in need.',
     'San Francisco', 'CA',
     fin(125000000, 120000000, 118000000, 85000000, 28000000, 2.8),
-    [{ title: 'Hunger Relief', metrics: [{ label: 'Meals Distributed', value: 60000000, unit: 'meals', target: 65000000 }, { label: 'Families Served Weekly', value: 60000, unit: 'families', target: 70000 }] }],
+    [
+      { title: 'Food Distribution', metrics: [{ label: 'Meals Distributed', value: 60000000, unit: 'meals', target: 65000000 }, { label: 'Families Served Weekly', value: 60000, unit: 'families', target: 70000 }] },
+      { title: 'Nutrition Education', metrics: [{ label: 'Nutrition Classes Held', value: 1800, unit: 'classes', target: 2000 }, { label: 'Participants', value: 24000, unit: 'people', target: 30000 }] },
+    ],
     [{ name: 'Tanis Crosby', title: 'CEO', since: '2018-01-01', bio: 'Leading the largest food bank in San Francisco with over 25 years of nonprofit experience.' }]),
   mkOrg('org-habitat', 'Habitat for Humanity Greater SF', 'housing',
     'Building affordable homes and empowering families to achieve strength, stability, and self-reliance through shelter.',
@@ -543,7 +558,10 @@ export const marketplaceOrgs: MarketplaceOrg[] = [
     'Improving the health and lives of people affected by poverty and emergencies by providing essential medical resources.',
     'Santa Barbara', 'CA',
     fin(1800000000, 1750000000, 1700000000, 850000000, 220000000, 1.6),
-    [{ title: 'Medical Aid', metrics: [{ label: 'People Reached', value: 100000000, unit: 'people', target: 120000000 }, { label: 'Countries Served', value: 80, unit: 'countries', target: 90 }] }]),
+    [
+      { title: 'Medical Aid Distribution', metrics: [{ label: 'People Reached', value: 100000000, unit: 'people', target: 120000000 }, { label: 'Countries Served', value: 80, unit: 'countries', target: 90 }] },
+      { title: 'Disaster Preparedness & Response', metrics: [{ label: 'Emergency Shipments', value: 450, unit: 'shipments', target: 500 }, { label: 'Health Facilities Supported', value: 2800, unit: 'facilities', target: 3000 }] },
+    ]),
   mkOrg('org-code-org', 'Code.org', 'education',
     'Expanding access to computer science in schools and increasing participation by young women and underrepresented students.',
     'Seattle', 'WA',
@@ -558,22 +576,36 @@ export const marketplaceOrgs: MarketplaceOrg[] = [
     'Leading the fight against hunger in the United States through a nationwide network of food banks and food rescue programs.',
     'Chicago', 'IL',
     fin(4200000000, 4000000000, 3900000000, 1200000000, 350000000, 1.1),
-    [{ title: 'National Hunger Relief', metrics: [{ label: 'Meals Provided Annually', value: 5300000000, unit: 'meals', target: 6000000000 }, { label: 'Member Food Banks', value: 200, unit: 'food banks', target: 200 }] }]),
+    [
+      { title: 'National Hunger Relief', metrics: [{ label: 'Meals Provided Annually', value: 5300000000, unit: 'meals', target: 6000000000 }, { label: 'Member Food Banks', value: 200, unit: 'food banks', target: 200 }] },
+      { title: 'Food Rescue & Recovery', metrics: [{ label: 'Pounds of Food Rescued', value: 3800000000, unit: 'lbs', target: 4500000000 }, { label: 'Retail Partners', value: 85000, unit: 'partners', target: 100000 }] },
+      { title: 'Anti-Hunger Advocacy', metrics: [{ label: 'Households Enrolled in SNAP', value: 2100000, unit: 'households', target: 2500000 }, { label: 'Policy Wins', value: 14, unit: 'policies', target: 20 }] },
+    ]),
   mkOrg('org-doctors-without-borders', 'Doctors Without Borders USA', 'health',
     'Delivering emergency medical aid to people affected by conflict, epidemics, disasters, and exclusion from healthcare.',
     'New York', 'NY',
     fin(550000000, 525000000, 500000000, 450000000, 150000000, 3.6),
-    [{ title: 'Global Medical Aid', metrics: [{ label: 'Outpatient Consultations', value: 12000000, unit: 'consultations', target: 14000000 }, { label: 'Countries With Active Programs', value: 72, unit: 'countries', target: 75 }] }]),
+    [
+      { title: 'Emergency Medical Response', metrics: [{ label: 'Outpatient Consultations', value: 12000000, unit: 'consultations', target: 14000000 }, { label: 'Countries With Active Programs', value: 72, unit: 'countries', target: 75 }] },
+      { title: 'Epidemic & Pandemic Response', metrics: [{ label: 'Vaccinations Administered', value: 3500000, unit: 'vaccinations', target: 4000000 }, { label: 'Outbreak Responses', value: 45, unit: 'responses', target: 50 }] },
+    ]),
   mkOrg('org-goodwill', 'Goodwill Industries International', 'workforce',
     'Helping people achieve self-sufficiency through education, skills training, and the power of work.',
     'Rockville', 'MD',
     fin(6200000000, 6000000000, 5800000000, 3500000000, 850000000, 1.8),
-    [{ title: 'Workforce Development', metrics: [{ label: 'People Served Annually', value: 25000000, unit: 'people', target: 30000000 }, { label: 'People Placed in Employment', value: 240000, unit: 'people', target: 300000 }] }]),
+    [
+      { title: 'Workforce Development', metrics: [{ label: 'People Placed in Employment', value: 240000, unit: 'people', target: 300000 }, { label: 'Job Training Graduates', value: 312000, unit: 'graduates', target: 350000 }] },
+      { title: 'Career Services & Education', metrics: [{ label: 'People Served Annually', value: 25000000, unit: 'people', target: 30000000 }, { label: 'Credentials Earned', value: 42000, unit: 'credentials', target: 50000 }] },
+      { title: 'Community Retail Operations', metrics: [{ label: 'Donated Goods Diverted from Landfill', value: 4600000000, unit: 'lbs', target: 5000000000 }, { label: 'Retail Locations', value: 3300, unit: 'stores', target: 3500 }] },
+    ]),
   mkOrg('org-habitat-international', 'Habitat for Humanity International', 'housing',
     'Bringing people together to build homes, communities, and hope across the United States and in 70 countries worldwide.',
     'Atlanta', 'GA',
     fin(350000000, 340000000, 320000000, 450000000, 85000000, 3.2),
-    [{ title: 'Global Housing', metrics: [{ label: 'Families Served', value: 7200000, unit: 'families', target: 8000000 }, { label: 'Homes Built or Repaired', value: 38000, unit: 'homes', target: 45000 }] }]),
+    [
+      { title: 'Home Construction & Repair', metrics: [{ label: 'Homes Built or Repaired', value: 38000, unit: 'homes', target: 45000 }, { label: 'Families Served', value: 7200000, unit: 'families', target: 8000000 }] },
+      { title: 'Community Development', metrics: [{ label: 'Volunteer Hours', value: 25000000, unit: 'hours', target: 30000000 }, { label: 'Countries with Active Programs', value: 70, unit: 'countries', target: 75 }] },
+    ]),
   mkOrg('org-edf', 'Environmental Defense Fund', 'environment',
     'Finding practical, lasting solutions to the most serious environmental problems by linking science, economics, and law.',
     'New York', 'NY',
@@ -620,7 +652,11 @@ export const marketplaceOrgs: MarketplaceOrg[] = [
     'Advancing cures and means of prevention for pediatric catastrophic diseases through research and treatment at no cost to families.',
     'Memphis', 'TN',
     fin(2400000000, 2300000000, 2200000000, 8500000000, 750000000, 4.1),
-    [{ title: 'Pediatric Research', metrics: [{ label: 'Patients Treated', value: 8500, unit: 'patients', target: 9000 }, { label: 'Survival Rate Improvement', value: 80, unit: '% (from 20% in 1962)', target: 85 }] }]),
+    [
+      { title: 'Pediatric Cancer Treatment', metrics: [{ label: 'Patients Treated', value: 8500, unit: 'patients', target: 9000 }, { label: 'Survival Rate Improvement', value: 80, unit: '% (from 20% in 1962)', target: 85 }] },
+      { title: 'Biomedical Research', metrics: [{ label: 'Active Research Projects', value: 850, unit: 'projects', target: 1000 }, { label: 'Published Papers', value: 760, unit: 'papers', target: 800 }] },
+      { title: 'Global Outreach & Training', metrics: [{ label: 'International Partner Sites', value: 38, unit: 'sites', target: 50 }, { label: 'Healthcare Workers Trained', value: 12000, unit: 'workers', target: 15000 }] },
+    ]),
   mkOrg('org-jobs-for-future', 'Jobs for the Future', 'workforce',
     'Driving transformation in the American workforce and education systems to achieve equitable economic advancement.',
     'Boston', 'MA',
