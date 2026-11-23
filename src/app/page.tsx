@@ -22,6 +22,62 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
+const faqItems = [
+  {
+    q: "Is Perpetual free for nonprofits?",
+    a: "Yes. Perpetual OS is completely free for nonprofits. There are no subscription fees, no setup costs, and no hidden charges. We sustain the platform through small transaction fees on donations processed through the marketplace.",
+  },
+  {
+    q: "How do you verify nonprofit data?",
+    a: "We pull financial data directly from IRS Form 990 filings. Outcome metrics are self-reported by nonprofits using our structured data format, which includes methodology documentation so donors can compare organizations on an equal basis.",
+  },
+  {
+    q: "What AI model powers the agents?",
+    a: "Perpetual OS agents are powered by Claude, Anthropic's AI assistant. Each agent is specialized with nonprofit-specific context and tools — the Grants Agent understands funder databases, the Finance Agent knows GAAP for nonprofits, and so on.",
+  },
+  {
+    q: "Can donors give through any method?",
+    a: "Yes. The marketplace supports credit/debit cards, ACH bank transfers, Donor Advised Funds (DAF), stock transfers, cryptocurrency (BTC, ETH), Qualified Charitable Distributions (QCD) from IRAs, and bequest intent for planned giving.",
+  },
+  {
+    q: "How is this different from GuideStar or Charity Navigator?",
+    a: "Those platforms rate nonprofits on financial ratios and overhead. Perpetual focuses on what actually matters: outcomes. We show real program metrics — how many people were served, what changed, and how efficiently. Donors browse by impact, not star ratings.",
+  },
+  {
+    q: "Is my data safe?",
+    a: "All data is encrypted at rest and in transit. We use Supabase (built on PostgreSQL) with row-level security. AI agents can only access your organization's data, never other organizations'. We never sell or share your data.",
+  },
+];
+
+function FAQAccordion() {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <div className="divide-y divide-slate-200 border-t border-b border-slate-200">
+      {faqItems.map((item, i) => (
+        <div key={i}>
+          <button
+            onClick={() => setOpen(open === i ? null : i)}
+            className="w-full flex items-center justify-between py-5 text-left"
+          >
+            <span className="text-base font-medium text-slate-900 pr-4">{item.q}</span>
+            <svg
+              className={`w-5 h-5 text-slate-400 shrink-0 transition-transform ${open === i ? "rotate-180" : ""}`}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {open === i && (
+            <div className="pb-5 text-sm text-slate-600 leading-relaxed animate-fade-up">
+              {item.a}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -230,6 +286,33 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Platform Stats */}
+      <section className="py-14 px-6 bg-white border-y border-slate-100">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
+          {[
+            { value: "116", label: "Nonprofits on the platform" },
+            { value: "12", label: "Cause areas covered" },
+            { value: "20+", label: "Cities represented" },
+            { value: "6", label: "AI agents per nonprofit" },
+          ].map((s) => (
+            <div key={s.label}>
+              <p className="text-3xl font-bold text-slate-900">{s.value}</p>
+              <p className="text-sm text-slate-500 mt-1">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-20 px-6 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-12">
+            Frequently asked questions
+          </h2>
+          <FAQAccordion />
         </div>
       </section>
 

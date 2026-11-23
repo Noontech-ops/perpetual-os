@@ -178,12 +178,8 @@ export default function PortfolioPage() {
             <div className="space-y-8">
               <div className="bg-white border border-slate-200 rounded-xl p-5">
                 <h2 className="font-semibold text-slate-900 mb-4">Allocation by Cause</h2>
-                <div className="flex rounded-full overflow-hidden h-4 mb-4">
-                  {causeAllocation.map((c) => (
-                    <div key={c.cause} className={c.color} style={{ width: `${c.pct}%` }} title={c.cause} />
-                  ))}
-                </div>
-                <div className="space-y-2">
+                <DonutChart segments={causeAllocation} totalLabel={fmt(totalGiven)} />
+                <div className="space-y-2 mt-4">
                   {causeAllocation.map((c) => (
                     <div key={c.cause} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
@@ -194,6 +190,29 @@ export default function PortfolioPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-xl p-5">
+                <h2 className="font-semibold text-slate-900 mb-4">Tax Receipts</h2>
+                <p className="text-sm text-slate-500 mb-3">Download your giving history for tax purposes.</p>
+                <button
+                  onClick={() => {
+                    const rows = holdings.map(h => `${h.name},${h.sector},${h.totalGiven},${h.lastGift}`);
+                    const csv = ["Organization,Sector,Amount,Last Gift", ...rows].join("\n");
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `perpetual-giving-${new Date().getFullYear()}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Download {new Date().getFullYear()} Summary
+                </button>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-xl p-5">
@@ -238,6 +257,57 @@ function buildHoldings(txs: GivingTransaction[], nameMap: Map<string, { name: st
       lastGift: formatMonth(data.lastDate),
     };
   });
+}
+
+const donutColorHex: Record<string, string> = {
+  "bg-emerald-500": "#10b981",
+  "bg-blue-500": "#3b82f6",
+  "bg-amber-500": "#f59e0b",
+  "bg-purple-500": "#a855f7",
+  "bg-rose-400": "#fb7185",
+  "bg-teal-500": "#14b8a6",
+  "bg-indigo-500": "#6366f1",
+};
+
+function DonutChart({ segments, totalLabel }: { segments: { cause: string; pct: number; color: string }[]; totalLabel: string }) {
+  const r = 50;
+  const cx = 60;
+  const cy = 60;
+  const circumference = 2 * Math.PI * r;
+
+  const segmentsWithOffset = segments.reduce<Array<{ cause: string; pct: number; color: string; offset: number; dash: number }>>((acc, seg) => {
+    const prevOffset = acc.length > 0 ? acc[acc.length - 1].offset + acc[acc.length - 1].dash : 0;
+    const dash = (seg.pct / 100) * circumference;
+    acc.push({ ...seg, offset: prevOffset, dash });
+    return acc;
+  }, []);
+
+  return (
+    <div className="flex justify-center">
+      <div className="relative w-32 h-32">
+        <svg viewBox="0 0 120 120" className="w-32 h-32 -rotate-90">
+          {segmentsWithOffset.map((seg) => (
+            <circle
+              key={seg.cause}
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="none"
+              stroke={donutColorHex[seg.color] ?? "#94a3b8"}
+              strokeWidth="14"
+              strokeDasharray={`${seg.dash} ${circumference - seg.dash}`}
+              strokeDashoffset={-seg.offset}
+              strokeLinecap="butt"
+            />
+          ))}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-lg font-bold text-slate-900">{totalLabel}</span>
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Total</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function buildMonthlyGiving(txs: GivingTransaction[]) {

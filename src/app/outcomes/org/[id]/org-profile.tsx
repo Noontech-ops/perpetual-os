@@ -522,7 +522,26 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
               </div>
             </div>
 
-            {giveStatus === "checkout" ? (
+            {giveStatus === "success" ? (
+              <div className="text-center py-4 space-y-3 animate-fade-up">
+                <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
+                  <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-lg font-semibold text-slate-900">Thank you!</p>
+                <p className="text-sm text-slate-600">Your ${giveAmount} gift to {org.name} has been recorded.</p>
+                <p className="text-xs text-slate-400">A tax receipt will be sent to your email.</p>
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => setGiveStatus("idle")} className="flex-1 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">
+                    Give Again
+                  </button>
+                  <Link href="/outcomes/portfolio" className="flex-1 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 text-center">
+                    View Portfolio
+                  </Link>
+                </div>
+              </div>
+            ) : giveStatus === "checkout" ? (
               <StripeCheckout
                 amount={parseFloat(giveAmount) || 0}
                 method={methodApiKeys[paymentMethod] || "card"}
@@ -539,17 +558,14 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
               <>
                 <button
                   onClick={handleGive}
-                  disabled={giveStatus === "loading" || giveStatus === "success"}
+                  disabled={giveStatus === "loading"}
                   className={`w-full py-3 rounded-xl font-medium text-base transition-colors ${
-                    giveStatus === "success"
-                      ? "bg-green-600 text-white"
-                      : giveStatus === "error"
-                        ? "bg-red-600 text-white hover:bg-red-700"
-                        : "bg-emerald-600 text-white hover:bg-emerald-700"
+                    giveStatus === "error"
+                      ? "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-emerald-600 text-white hover:bg-emerald-700"
                   } disabled:opacity-70`}
                 >
                   {giveStatus === "loading" && "Processing..."}
-                  {giveStatus === "success" && "Donation Recorded!"}
                   {giveStatus === "error" && "Failed — Try Again"}
                   {giveStatus === "idle" && `Give $${giveAmount || "0"}`}
                 </button>
