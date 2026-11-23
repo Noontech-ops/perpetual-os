@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Board Dashboard",
+  title: "Board View",
   description: "Board governance dashboard with financial summaries, meetings, compliance tracking, and strategic oversight.",
 };
 
