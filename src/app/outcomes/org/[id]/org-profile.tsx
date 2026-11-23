@@ -94,9 +94,6 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
       designation: "general",
     });
     setGiveStatus(result ? "success" : "error");
-    if (result) {
-      setTimeout(() => setGiveStatus("idle"), 3000);
-    }
   }
 
   if (loading) {
@@ -583,7 +580,6 @@ export default function OrgProfilePage({ orgId }: { orgId: string }) {
                 organizationName={org.name}
                 onSuccess={() => {
                   setGiveStatus("success");
-                  setTimeout(() => setGiveStatus("idle"), 3000);
                 }}
                 onError={() => { setGiveStatus("error"); }}
                 onCancel={() => setGiveStatus("idle")}
