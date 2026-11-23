@@ -299,7 +299,7 @@ export default function Home() {
             { value: "6", label: "AI agents per nonprofit" },
           ].map((s) => (
             <div key={s.label}>
-              <p className="text-3xl font-bold text-slate-900">{s.value}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-slate-900">{s.value}</p>
               <p className="text-sm text-slate-500 mt-1">{s.label}</p>
             </div>
           ))}

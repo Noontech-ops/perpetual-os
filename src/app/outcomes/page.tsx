@@ -244,9 +244,17 @@ export default function OutcomesExplorePage() {
                           {location}{org.founded && org.founded !== '2000-01-01' ? `${location ? ' · ' : ''}Est. ${org.founded.slice(0, 4)}` : ''}
                         </p>
                       </div>
-                      <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 shrink-0">
-                        {formatSector(org.sector)}
-                      </span>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700">
+                          {formatSector(org.sector)}
+                        </span>
+                        {org.ein && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-slate-400">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            Verified
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Mission */}
