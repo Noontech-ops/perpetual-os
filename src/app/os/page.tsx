@@ -104,6 +104,7 @@ export default function OSDashboard() {
 
   useEffect(() => {
     let cancelled = false;
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false); }, 8000);
     Promise.all([
       getGrants(),
       getConstituents(),
@@ -126,7 +127,7 @@ export default function OSDashboard() {
       setError(err instanceof Error ? err.message : "Failed to load dashboard data");
       setLoading(false);
     });
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, [retryCount]);
 
   async function handleUpdateAction(id: string, status: "approved" | "rejected") {
