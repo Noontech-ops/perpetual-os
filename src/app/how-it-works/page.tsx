@@ -344,7 +344,7 @@ export default function HowItWorksPage() {
               <p className="font-semibold text-slate-900 mb-3">For Nonprofits</p>
               <ul className="space-y-2 text-slate-500">
                 <li><Link href="/os" className="hover:text-emerald-600">Perpetual OS</Link></li>
-                <li><Link href="/how-it-works#pricing" className="hover:text-emerald-600">Pricing</Link></li>
+                <li><Link href="/pricing" className="hover:text-emerald-600">Pricing</Link></li>
               </ul>
             </div>
             <div>

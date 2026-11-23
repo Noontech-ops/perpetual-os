@@ -17,6 +17,15 @@ const agentLabels: Record<AgentType, string> = {
   board: 'Board Agent',
 };
 
+const agentSuggestions: Record<AgentType, string[]> = {
+  grants: ["Find grants for literacy programs", "Draft a LOI for Hellman Foundation", "What deadlines are coming up?"],
+  donor_relations: ["Who are our lapsed donors?", "Draft a thank-you email for recent gifts", "Show donor retention trends"],
+  finance: ["Summarize our cash position", "Flag any budget variances", "Forecast next quarter's cash flow"],
+  compliance: ["What filings are due this month?", "Check our state registration status", "Review restricted fund compliance"],
+  marketing: ["Draft a year-end appeal email", "Suggest social media content", "How is our last campaign performing?"],
+  board: ["Prepare the next board packet", "Summarize recent resolutions", "What committees need attention?"],
+};
+
 export function AgentChat({ agentType, onClose }: { agentType: AgentType; onClose: () => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -72,8 +81,25 @@ export function AgentChat({ agentType, onClose }: { agentType: AgentType; onClos
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
-            <div className="text-center text-gray-400 mt-8">
-              <p className="text-sm">Ask the {agentLabels[agentType]} anything about your organization.</p>
+            <div className="mt-6 space-y-4">
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center mx-auto mb-3">
+                  <span className="text-brand-600 text-lg font-bold">AI</span>
+                </div>
+                <p className="text-sm font-medium text-gray-700">{agentLabels[agentType]}</p>
+                <p className="text-xs text-gray-400 mt-1">Ask anything about your organization</p>
+              </div>
+              <div className="space-y-2 px-2">
+                {agentSuggestions[agentType].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => { setInput(s); }}
+                    className="w-full text-left px-3 py-2.5 text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           {messages.map((m, i) => (

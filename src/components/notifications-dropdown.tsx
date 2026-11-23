@@ -104,9 +104,13 @@ export function NotificationsDropdown() {
             ))}
           </div>
           <div className="px-4 py-2.5 border-t border-slate-200 bg-slate-50">
-            <button className="text-xs text-brand-600 hover:text-brand-700 font-medium w-full text-center">
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setOpen(false); window.location.hash = ""; }}
+              className="text-xs text-brand-600 hover:text-brand-700 font-medium w-full text-center block"
+            >
               View all activity
-            </button>
+            </a>
           </div>
         </div>
       )}
