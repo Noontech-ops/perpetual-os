@@ -345,6 +345,7 @@ export default function HowItWorksPage() {
               <ul className="space-y-2 text-slate-500">
                 <li><Link href="/os" className="hover:text-emerald-600">Perpetual OS</Link></li>
                 <li><Link href="/pricing" className="hover:text-emerald-600">Pricing</Link></li>
+                <li><Link href="/contact" className="hover:text-emerald-600">Contact</Link></li>
               </ul>
             </div>
             <div>
