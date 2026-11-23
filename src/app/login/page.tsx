@@ -10,6 +10,7 @@ function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
@@ -79,7 +80,7 @@ function LoginForm() {
                   setLoading(false);
                   if (error) { setError(error.message); return; }
                   setError('');
-                  alert('Check your email for a password reset link.');
+                  setInfo('Check your email for a password reset link.');
                 }}
                 className="text-xs text-brand-600 hover:text-brand-700 font-medium"
               >
@@ -98,6 +99,7 @@ function LoginForm() {
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
+          {info && <p className="text-sm text-emerald-600">{info}</p>}
 
           <button
             type="submit"

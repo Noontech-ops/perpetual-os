@@ -359,7 +359,10 @@ export default function HowItWorksPage() {
           </div>
           <div className="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between text-xs text-slate-400">
             <span>&copy; 2026 Perpetual. All rights reserved.</span>
-            <span>perpetualoutcomes.com</span>
+            <div className="flex items-center gap-4">
+              <Link href="/terms" className="hover:text-emerald-600">Terms</Link>
+              <Link href="/privacy" className="hover:text-emerald-600">Privacy</Link>
+            </div>
           </div>
         </div>
       </footer>

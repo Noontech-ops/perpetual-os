@@ -35,7 +35,7 @@ export default function OutcomesLayout({ children }: { children: ReactNode }) {
               <p className="font-semibold text-slate-900 mb-3">For Nonprofits</p>
               <ul className="space-y-2 text-slate-500">
                 <li><Link href="/os" className="hover:text-emerald-600">Perpetual OS</Link></li>
-                <li><Link href="/how-it-works#pricing" className="hover:text-emerald-600">Pricing</Link></li>
+                <li><Link href="/pricing" className="hover:text-emerald-600">Pricing</Link></li>
               </ul>
             </div>
             <div>
@@ -50,7 +50,10 @@ export default function OutcomesLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between text-xs text-slate-400">
             <span>&copy; 2026 Perpetual. All rights reserved.</span>
-            <span>perpetualoutcomes.com</span>
+            <div className="flex items-center gap-4">
+              <Link href="/terms" className="hover:text-emerald-600">Terms</Link>
+              <Link href="/privacy" className="hover:text-emerald-600">Privacy</Link>
+            </div>
           </div>
         </div>
       </footer>
