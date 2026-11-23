@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(fb);
       }
       if (id) {
-        const fb = marketplaceOrgs.find(o => o.id === id);
+        const fb = marketplaceOrgs.find(o => o.id === id || o.slug === id);
         return NextResponse.json(fb ?? { error: 'Not found' }, fb ? {} : { status: 404 });
       }
       return NextResponse.json(fallbackSearch(q, sector));
