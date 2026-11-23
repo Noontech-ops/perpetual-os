@@ -48,6 +48,9 @@ export function OutcomesNav() {
               <Link href="/how-it-works" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
                 How It Works
               </Link>
+              <Link href="/pricing" className="text-sm font-medium text-slate-700 hover:text-emerald-600 transition-colors">
+                Pricing
+              </Link>
             </div>
           </div>
           <div className="flex items-center gap-3">

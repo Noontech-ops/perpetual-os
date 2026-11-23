@@ -2,12 +2,63 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { AgentChat } from "@/components/agent-chat";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { CommandPalette } from "@/components/command-palette";
 import type { AgentType } from "@/lib/types";
+
+const agentOptions: { type: AgentType; label: string; color: string }[] = [
+  { type: "grants", label: "Grants", color: "bg-blue-500" },
+  { type: "donor_relations", label: "Donors", color: "bg-emerald-500" },
+  { type: "finance", label: "Finance", color: "bg-amber-500" },
+  { type: "compliance", label: "Compliance", color: "bg-red-500" },
+  { type: "marketing", label: "Marketing", color: "bg-purple-500" },
+  { type: "board", label: "Board", color: "bg-indigo-500" },
+];
+
+function AgentFab({ onSelect }: { onSelect: (t: AgentType) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="fixed bottom-6 right-6 z-40">
+      {open && (
+        <div className="absolute bottom-16 right-0 bg-white rounded-xl shadow-lg border border-slate-200 py-2 w-48 animate-fade-up">
+          <p className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Chat with Agent</p>
+          {agentOptions.map((a) => (
+            <button
+              key={a.type}
+              onClick={() => { onSelect(a.type); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <span className={`w-2.5 h-2.5 rounded-full ${a.color}`} />
+              {a.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg hover:bg-brand-700 flex items-center justify-center transition-transform hover:scale-105"
+        aria-label="Open AI Agent chat"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      </button>
+    </div>
+  );
+}
 
 const navItems = [
   { href: "/os", hash: "", label: "Dashboard", icon: "grid" },
@@ -208,15 +259,7 @@ export default function OSShell({ children }: { children: ReactNode }) {
       </div>
 
       {/* Agent Chat FAB */}
-      <button
-        onClick={() => setChatAgent('grants')}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg hover:bg-brand-700 flex items-center justify-center z-40"
-        aria-label="Open AI Agent chat"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      </button>
+      <AgentFab onSelect={setChatAgent} />
 
       {chatAgent && <AgentChat agentType={chatAgent} onClose={() => setChatAgent(null)} />}
 

@@ -15,6 +15,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
         <Link href="/outcomes" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">For Donors</Link>
         <Link href="/os" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">For Nonprofits</Link>
         <Link href="/how-it-works" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">How It Works</Link>
+        <Link href="/pricing" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">Pricing</Link>
         <Link href="/login" onClick={onClose} className="text-base font-medium text-slate-700 hover:text-brand-600 transition-colors">Sign In</Link>
         <Link href="/outcomes" onClick={onClose} className="mt-2 text-center bg-brand-600 text-white px-4 py-2.5 rounded-lg hover:bg-brand-700 transition-colors font-medium">Get Started</Link>
       </nav>
@@ -100,6 +101,9 @@ export default function Home() {
             </Link>
             <Link href="/how-it-works" className="text-sm text-slate-600 hover:text-slate-900 transition-colors hidden sm:inline">
               How It Works
+            </Link>
+            <Link href="/pricing" className="text-sm text-slate-600 hover:text-slate-900 transition-colors hidden sm:inline">
+              Pricing
             </Link>
             <Link
               href="/outcomes"
@@ -370,7 +374,7 @@ export default function Home() {
               <h4 className="text-sm font-semibold text-white mb-3">Resources</h4>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
-                <li><Link href="/how-it-works#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
                 <li><Link href="/how-it-works#faq" className="hover:text-white transition-colors">FAQ</Link></li>
               </ul>
             </div>
