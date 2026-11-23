@@ -15,6 +15,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/login`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE}/signup`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE}/onboarding`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE}/pricing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${BASE}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
   ];
 
   const orgPages: MetadataRoute.Sitemap = marketplaceOrgs.map((org) => ({
