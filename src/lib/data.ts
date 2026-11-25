@@ -21,7 +21,15 @@ function camelizeKeys(obj: unknown): unknown {
   return obj;
 }
 
+const isSupabaseConfigured =
+  typeof window !== 'undefined' &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'proxy-injected';
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T | null> {
+  if (!isSupabaseConfigured && !path.startsWith('/api/search') && !path.startsWith('/api/organizations/public') && !path.startsWith('/api/agents/run')) {
+    return null;
+  }
   try {
     const res = await fetch(path, init);
     if (!res.ok) return null;

@@ -3,6 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!key || key === 'proxy-injected') {
+      return NextResponse.json([], { status: 200 });
+    }
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('agent_configs')
